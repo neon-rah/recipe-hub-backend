@@ -38,18 +38,18 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public List<Notification> getUserNotifications(UUID userId) {
-        return notificationRepository.findAllByUserUserIdOrderByCreatedAtDesc(userId);
+        return notificationRepository.findAllByUserIdUserOrderByCreatedAtDesc(userId);
     }
 
     @Override
     public int getUnreadCount(UUID userId) {
-        return notificationRepository.countAllByUserUserIdAndIsReadFalse(userId);
+        return notificationRepository.countAllByUserIdUserAndIsReadFalse(userId);
     }
 
     @Override
     @Transactional
     public void markAllAsRead(UUID userId) {
-        List<Notification> unreadNotifications = notificationRepository.findAllByUserUserIdAndIsReadFalseOrderByCreatedAtDesc(userId);
+        List<Notification> unreadNotifications = notificationRepository.findAllByUserIdUserAndIsReadFalseOrderByCreatedAtDesc(userId);
         unreadNotifications.forEach(notification -> {
             notification.setRead(true);
         });
@@ -65,6 +65,6 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     public void deleteAllNotifications(UUID userId) {
-        notificationRepository.deleteAllByUserUserId(userId);
+        notificationRepository.deleteAllByUserIdUser(userId);
     }
 }

@@ -19,7 +19,7 @@ public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_notif", updatable = false, nullable = false)
-    private int notifId;
+    private int idNotif;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

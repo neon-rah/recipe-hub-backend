@@ -13,7 +13,7 @@ import java.util.UUID;
 
 public interface RecipeRepository extends JpaRepository<Recipe, Integer>, JpaSpecificationExecutor<Recipe> {
 
-    List<Recipe> findAllByUserUserId(UUID userId);
+    List<Recipe> findAllByUserIdUser(UUID userId);
     List<Recipe> findAllByCategory(String category);
     List<Recipe> findAllByRegion(String region);
 }

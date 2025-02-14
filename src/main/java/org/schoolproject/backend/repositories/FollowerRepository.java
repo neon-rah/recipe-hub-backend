@@ -13,16 +13,16 @@ import java.util.UUID;
 
 public interface FollowerRepository extends JpaRepository<Follower, Integer> {
     boolean existsByFollowerAndFollowed(User follower, User followed);
-    boolean existsByFollowerUserIdAndFollowedUserId(UUID followerId, UUID followedId);
+//    boolean existsByFollowerIdUserAndFollowedIdUser(UUID followerId, UUID followedId);
 
     Optional<Follower> findByFollowerAndFollowed(User follower, User followed);
     List<Follower> findAllByFollower(User follower);
     List<Follower> findAllByFollowed(User followed);
     int countByFollower(User follower);
     int countByFollowed(User followed);
-    List<Follower> findAllByFollowerUserId(UUID followerId);
+   /* List<Follower> findAllByFollowerUserId(UUID followerId);
     List<Follower> findAllByFollowedUserId(UUID followedId);
     int countByFollowerUserId(UUID followerId);
-    int countByFollowedUserId(UUID followedId);
+    int countByFollowedUserId(UUID followedId);*/
 
 }

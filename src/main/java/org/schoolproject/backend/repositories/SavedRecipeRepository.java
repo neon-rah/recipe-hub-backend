@@ -11,10 +11,10 @@ import java.util.Optional;
 import java.util.UUID;
 @Repository
 public interface SavedRecipeRepository extends JpaRepository<SavedRecipe, Integer> {
-    List<SavedRecipe> findAllByUserUserId(UUID userId);
-    boolean existsByUserUserIdAndRecipeRecipeId(UUID userId, int recipeId);
-    Optional<SavedRecipe> findByUserUserIdAndRecipeRecipeId(UUID userId, int recipeId);
-    void deleteAllByUserUserId(UUID userId);
+    List<SavedRecipe> findAllByUserIdUser(UUID userId);
+    boolean existsByUserIdUserAndRecipeIdRecipe(UUID userId, int recipeId);
+    Optional<SavedRecipe> findByUserIdUserAndRecipeIdRecipe(UUID userId, int recipeId);
+    void deleteAllByUserIdUser(UUID userId);
     void deleteByUserAndRecipe(User user, Recipe recipe);
 
 

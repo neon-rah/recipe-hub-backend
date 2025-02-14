@@ -19,7 +19,7 @@ public class Recipe {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-incrémentation
     @Column(name = "id_recipe", updatable = false, nullable = false)
-    private int recipeId;
+    private int idRecipe;
 
     @Column(length = 100, nullable = false)
     private String title;

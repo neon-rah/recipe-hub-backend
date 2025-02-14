@@ -19,7 +19,7 @@ public class Follower {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_follow", nullable = false, updatable = false)
-    private int followId;
+    private int idFollow;
 
     @ManyToOne
     @JoinColumn(name = "follower_id", nullable = false)

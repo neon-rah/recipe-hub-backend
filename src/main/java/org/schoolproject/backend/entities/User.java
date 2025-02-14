@@ -22,7 +22,7 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)  // Utilisation de la stratégie AUTO pour UUID
     @Column(name = "id_user", nullable = false)
-    private UUID userId;  // UUID sans la stratégie de génération customisée
+    private UUID idUser;  // UUID sans la stratégie de génération customisée
 
     @Column(name = "last_name", length = 50, nullable = false)
     private String lastName;

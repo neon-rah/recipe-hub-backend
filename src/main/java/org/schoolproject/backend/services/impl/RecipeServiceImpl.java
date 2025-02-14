@@ -38,7 +38,7 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public List<Recipe> findRecipesByUserId(UUID userId) {
-        return recipeRepository.findAllByUserUserId(userId);
+        return recipeRepository.findAllByUserIdUser(userId);
     }
 
     @Override

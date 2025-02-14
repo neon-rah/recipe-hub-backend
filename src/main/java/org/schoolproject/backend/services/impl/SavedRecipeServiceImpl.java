@@ -48,7 +48,7 @@ public class SavedRecipeServiceImpl implements SavedRecipeService {
     @Override
     @Transactional
     public void removeSavedRecipe(UUID userId, int recipeId) {
-        Optional<SavedRecipe> existingSavedRecipe = savedRecipeRepository.findByUserUserIdAndRecipeRecipeId(userId, recipeId);
+        Optional<SavedRecipe> existingSavedRecipe = savedRecipeRepository.findByUserIdUserAndRecipeIdRecipe(userId, recipeId);
         existingSavedRecipe.ifPresentOrElse(
                 savedRecipeRepository::delete,
                 ()-> { throw new IllegalArgumentException("Saved recipe not found"); }
@@ -58,17 +58,17 @@ public class SavedRecipeServiceImpl implements SavedRecipeService {
 
     @Override
     public List<SavedRecipe> getSavedRecipes(UUID userId) {
-        return savedRecipeRepository.findAllByUserUserId(userId);
+        return savedRecipeRepository.findAllByUserIdUser(userId);
     }
 
     @Override
     public boolean isSavedRecipe(UUID userId, int recipeId) {
-        return savedRecipeRepository.existsByUserUserIdAndRecipeRecipeId(userId, recipeId);
+        return savedRecipeRepository.existsByUserIdUserAndRecipeIdRecipe(userId, recipeId);
     }
 
     @Override
     @Transactional
     public void clearAllSavedRecipes(UUID userId) {
-        savedRecipeRepository.deleteAllByUserUserId(userId);
+        savedRecipeRepository.deleteAllByUserIdUser(userId);
     }
 }

@@ -31,11 +31,11 @@ public class LikeServiceImpl implements LikeService {
     @Override
     @Transactional
     public Like createLike(UUID userId, int recipeId) {
-        User user = userRepository.findByUserId(userId)
+        User user = userRepository.findByIdUser(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         Recipe recipe = recipeRepository.findById(recipeId)
                 .orElseThrow(() -> new RuntimeException("Recipe not found"));
-        Optional<Like> existingLike = likeRepository.findByUserUserIdAndRecipeRecipeId(userId, recipeId);
+        Optional<Like> existingLike = likeRepository.findByUserIdUserAndRecipeIdRecipe(userId, recipeId);
 
         if(existingLike.isPresent()) {
             likeRepository.delete(existingLike.get());
@@ -51,7 +51,7 @@ public class LikeServiceImpl implements LikeService {
     @Override
     @Transactional
     public void deleteLike(UUID userId, int recipeId) {
-        Like like = likeRepository.findByUserUserIdAndRecipeRecipeId(userId, recipeId)
+        Like like = likeRepository.findByUserIdUserAndRecipeIdRecipe(userId, recipeId)
                 .orElseThrow(() -> new RuntimeException("Like not found"));
 
         likeRepository.delete(like);
@@ -59,21 +59,21 @@ public class LikeServiceImpl implements LikeService {
 
     @Override
     public boolean isLikedByUser(UUID userId, int recipeId) {
-        return likeRepository.existsByUserUserIdAndRecipeRecipeId(userId, recipeId);
+        return likeRepository.existsByUserIdUserAndRecipeIdRecipe(userId, recipeId);
     }
 
     @Override
     public List<Like> getLikesByUser(UUID userId) {
-        return likeRepository.findAllByUserUserId(userId);
+        return likeRepository.findAllByUserIdUser(userId);
     }
 
     @Override
     public List<Like> getLikesByRecipe(int recipeId) {
-        return likeRepository.findAllByRecipeRecipeId(recipeId);
+        return likeRepository.findAllByRecipeIdRecipe(recipeId);
     }
 
     @Override
     public int getLikeCountByRecipe(int recipeId) {
-        return likeRepository.countByRecipeRecipeId(recipeId);
+        return likeRepository.countByRecipeIdRecipe(recipeId);
     }
 }

@@ -20,7 +20,7 @@ public class SavedRecipe {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_save", nullable = false, updatable = false)
-    private int saveId;
+    private int idSave;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

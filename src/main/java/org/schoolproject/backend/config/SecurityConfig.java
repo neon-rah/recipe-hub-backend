@@ -1,7 +1,6 @@
 package org.schoolproject.backend.config;
 
 import lombok.RequiredArgsConstructor;
-import org.schoolproject.backend.services.impl.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -10,6 +9,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,7 +21,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private 
-final UserDetailsServiceImpl userDetailsService;
+final UserDetailsService userDetailsService;
     private final JwtFilter jwtFilter;
     /**
      * Définit le `AuthenticationProvider` qui récupère les utilisateurs via `UserDetailsServiceImpl`
@@ -29,7 +29,7 @@ final UserDetailsServiceImpl userDetailsService;
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService((UserDetailsService) userDetailsService);
+        authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }
@@ -67,9 +67,9 @@ final UserDetailsServiceImpl userDetailsService;
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public JwtFilter jwtFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService) {
-        return new JwtFilter(jwtUtil, userDetailsService);
-    }
+//    @Bean
+//    public JwtFilter jwtFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService) {
+//        return new JwtFilter(jwtUtil, userDetailsService);
+//    }
 
 }

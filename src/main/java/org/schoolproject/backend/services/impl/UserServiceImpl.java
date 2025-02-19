@@ -1,7 +1,11 @@
 package org.schoolproject.backend.services.impl;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.schoolproject.backend.dto.UserDTO;
 import org.schoolproject.backend.entities.User;
+import org.schoolproject.backend.mappers.RecipeMapper;
+import org.schoolproject.backend.mappers.UserMapper;
 import org.schoolproject.backend.repositories.UserRepository;
 import org.schoolproject.backend.services.FileStorageService;
 import org.schoolproject.backend.services.UserService;
@@ -9,53 +13,51 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-
     private final FileStorageService fileStorageService;
-
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, FileStorageService fileStorageService) {
-
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.fileStorageService = fileStorageService;
-    }
+    private final UserMapper userMapper;
+    private final RecipeMapper recipeMapper;
 
     @Override
-    public User createUser(User user, MultipartFile profileImage) {
-        if(userRepository.existsByEmail(user.getEmail())) {
+    @Transactional
+    public UserDTO createUser(UserDTO userDTO, MultipartFile profileImage) {
+        if (userRepository.existsByEmail(userDTO.getEmail())) {
             throw new IllegalArgumentException("Email address already in use");
         }
 
-        String imageUrl = null;
-        if(profileImage != null && !profileImage.isEmpty()) {
-            imageUrl = fileStorageService.storeFile(profileImage, "user", null);
-        }
+        String imageUrl = (profileImage != null && !profileImage.isEmpty())
+                ? fileStorageService.storeFile(profileImage, "user", null)
+                : null;
 
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        User user = userMapper.toEntity(userDTO);
+        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         user.setProfilePic(imageUrl);
-        return userRepository.save(user);
+
+        return userMapper.toDto(userRepository.save(user));
     }
 
     @Override
-    public Optional<User> findUserById(UUID userId) {
-        return userRepository.findById(userId);
+    public Optional<UserDTO> findUserById(UUID userId) {
+        return userRepository.findById(userId).map(userMapper::toDto);
     }
 
     @Override
-    public Optional<User> findUserByEmail(String email) {
-        return userRepository.findByEmail(email);
+    public Optional<UserDTO> findUserByEmail(String email) {
+        return userRepository.findByEmail(email).map(userMapper::toDto);
     }
 
     @Override
-    public List<User> findAllUsers() {
-        return userRepository.findAll();
+    public List<UserDTO> findAllUsers() {
+        return userRepository.findAll().stream().map(userMapper::toDto).toList();
     }
 
     @Override
@@ -65,21 +67,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public User updateUser(UUID userId, User updatedUser, MultipartFile newProfileImage) {
+    public UserDTO updateUser(UUID userId, UserDTO updatedUserDTO, MultipartFile newProfileImage) {
         return userRepository.findById(userId).map(existingUser -> {
-            existingUser.setFirstName(updatedUser.getFirstName());
-            existingUser.setLastName(updatedUser.getLastName());
-            existingUser.setEmail(updatedUser.getEmail());
-//            existingUser.setPhone(updatedUser.getPhone());
-            existingUser.setAddress(updatedUser.getAddress());
+            existingUser.setFirstName(updatedUserDTO.getFirstName());
+            existingUser.setLastName(updatedUserDTO.getLastName());
+            existingUser.setEmail(updatedUserDTO.getEmail());
+            existingUser.setAddress(updatedUserDTO.getAddress());
 
             if (newProfileImage != null && !newProfileImage.isEmpty()) {
                 String newImageUrl = fileStorageService.storeFile(newProfileImage, "user", existingUser.getProfilePic());
                 existingUser.setProfilePic(newImageUrl);
             }
 
-            return userRepository.save(existingUser);
-        }).orElseThrow(()-> new IllegalArgumentException("User not found"));
+            return userMapper.toDto(userRepository.save(existingUser));
+        }).orElseThrow(() -> new IllegalArgumentException("User not found"));
     }
 
     @Override
@@ -109,5 +110,22 @@ public class UserServiceImpl implements UserService {
             existingUser.setPassword(passwordEncoder.encode(newPassword));
             userRepository.save(existingUser);
         });
+    }
+
+    @Override
+    @Transactional
+    public Optional<UserDTO> getUserProfile(UUID userId) {
+        return userRepository.findById(userId)
+                .map(this::toDtoWithRecipes);
+    }
+
+    private UserDTO toDtoWithRecipes(User user) {
+        UserDTO userDTO = userMapper.toDto(user);
+        userDTO.setRecipes(
+                user.getRecipes() != null ?
+                        user.getRecipes().stream().map(recipeMapper::toDto).toList() :
+                        Collections.emptyList()
+        );
+        return userDTO;
     }
 }

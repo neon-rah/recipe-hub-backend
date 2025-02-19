@@ -113,7 +113,23 @@
 			<artifactId>jjwt-impl</artifactId>
 			<version>0.12.2</version>
 		</dependency>
-
+		<!-- https://mvnrepository.com/artifact/org.projectlombok/lombok-mapstruct-binding -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok-mapstruct-binding</artifactId>
+			<version>0.2.0</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.mapstruct/mapstruct -->
+		<dependency>
+			<groupId>org.mapstruct</groupId>
+			<artifactId>mapstruct</artifactId>
+			<version>1.5.5.Final</version>
+		</dependency>
+		<dependency>
+			<groupId>org.mapstruct</groupId>
+			<artifactId>mapstruct-processor</artifactId>
+			<version>1.5.5.Final</version>
+		</dependency>
 
 	</dependencies>
 <!--	<dependencyManagement>-->

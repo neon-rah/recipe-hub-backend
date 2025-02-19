@@ -1,6 +1,6 @@
 package org.schoolproject.backend.services;
 
-import org.schoolproject.backend.entities.Recipe;
+import org.schoolproject.backend.dto.RecipeDTO;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -8,12 +8,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface RecipeService {
-    Recipe createRecipe(Recipe recipe, MultipartFile recipeImage);
-    Optional<Recipe> findRecipeById(int recipeId);
-    List<Recipe> findAllRecipes();
-    List<Recipe> findRecipesByUserId(UUID userId);
-    Recipe updateRecipe(int recipeId, Recipe updatedRecipe, MultipartFile newRecipeImage);
+    RecipeDTO createRecipe(RecipeDTO recipeDTO, MultipartFile recipeImage);
+    Optional<RecipeDTO> findRecipeById(int recipeId);
+    List<RecipeDTO> findAllRecipes();
+    List<RecipeDTO> findRecipesByUserId(UUID userId);
+    RecipeDTO updateRecipe(int recipeId, RecipeDTO updatedRecipeDTO, MultipartFile newRecipeImage);
     void deleteRecipe(int recipeId);
-
-    List<Recipe> searchRecipes(String title, String region, String ingredient, String category);
+    List<RecipeDTO> searchRecipes(String title, String region, String ingredient, String category);
+    List<RecipeDTO> findRecipesWithUserInfo(UUID userId); 
 }

@@ -1,13 +1,12 @@
 package org.schoolproject.backend.controllers;
 
-import org.schoolproject.backend.entities.User;
+import org.schoolproject.backend.dto.UserDTO;
 import org.schoolproject.backend.services.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -19,32 +18,32 @@ public class UserController {
         this.userService = userService;
     }
 
-    // 📌 Création d'un utilisateur avec upload d'image
+    //  Création d'un utilisateur avec upload d'image
     @PostMapping(consumes = {"multipart/form-data"})
-    public ResponseEntity<User> createUser(
-            @RequestPart("user") User user,
+    public ResponseEntity<UserDTO> createUser(
+            @RequestPart("user") UserDTO userDTO,
             @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
 
-        User createdUser = userService.createUser(user, profileImage);
+        UserDTO createdUser = userService.createUser(userDTO, profileImage);
         return ResponseEntity.ok(createdUser);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> findUserById(@PathVariable UUID id) {
+    public ResponseEntity<UserDTO> findUserById(@PathVariable UUID id) {
         return userService.findUserById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/email/{email}")
-    public ResponseEntity<User> findUserByEmail(@PathVariable String email) {
+    public ResponseEntity<UserDTO> findUserByEmail(@PathVariable String email) {
         return userService.findUserByEmail(email)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping
-    public ResponseEntity<List<User>> findAllUsers() {
+    public ResponseEntity<List<UserDTO>> findAllUsers() {
         return ResponseEntity.ok(userService.findAllUsers());
     }
 
@@ -53,14 +52,14 @@ public class UserController {
         return ResponseEntity.ok(userService.existsUserByEmail(email));
     }
 
-    // 📌 Mise à jour d'un utilisateur avec image de profil
+    // Mise à jour d'un utilisateur avec image de profil
     @PutMapping(value = "/{id}", consumes = {"multipart/form-data"})
-    public ResponseEntity<User> updateUser(
+    public ResponseEntity<UserDTO> updateUser(
             @PathVariable UUID id,
-            @RequestPart("user") User updatedUser,
+            @RequestPart("user") UserDTO updatedUser,
             @RequestPart(value = "profileImage", required = false) MultipartFile newProfileImage) {
 
-        User user = userService.updateUser(id, updatedUser, newProfileImage);
+        UserDTO user = userService.updateUser(id, updatedUser, newProfileImage);
         return ResponseEntity.ok(user);
     }
 
@@ -79,5 +78,13 @@ public class UserController {
     public ResponseEntity<Void> changePassword(@PathVariable UUID id, @RequestBody String newPassword) {
         userService.changePassword(id, newPassword);
         return ResponseEntity.noContent().build();
+    }
+
+    //  Endpoint pour récupérer le profil utilisateur avec ses recettes
+    @GetMapping("/profile/{id}")
+    public ResponseEntity<UserDTO> getUserProfile(@PathVariable UUID id) {
+        return userService.getUserProfile(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 }

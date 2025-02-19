@@ -1,6 +1,5 @@
 package org.schoolproject.backend.entities;
 
-
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -23,7 +22,11 @@ public class Notification {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private User user;  // Utilisateur destinataire de la notification (celui qui reçoit la notification)
+
+    @ManyToOne
+    @JoinColumn(name = "sender_id", nullable = false)
+    private User sender;  // Utilisateur qui envoie la notification (celui qui a effectué l'action, ex. suivi ou nouvelle recette)
 
     @Column(length = 50, nullable = false)
     private String title;
@@ -32,9 +35,15 @@ public class Notification {
     private String message;
 
     @CreationTimestamp
-    @Column(updatable = false)
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "isread", nullable = false)
-    private boolean isRead = false;
+    @Column(name = "is_read", nullable = false)
+    private boolean read = false;
+
+    @Column(name = "related_entity_id")
+    private Integer relatedEntityId;  // Par exemple, ID du profil ou de la recette
+
+    @Column(name = "entity_type", length = 50)
+    private String entityType;  // 'user' ou 'recipe'
 }

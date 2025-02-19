@@ -12,8 +12,8 @@ import java.util.UUID;
 public interface NotificationRepository extends JpaRepository<Notification, Integer> {
     List<Notification> findAllByUserIdUser(UUID userId);
     List<Notification> findAllByUserIdUserOrderByCreatedAtDesc(UUID userId);
-    List<Notification> findAllByUserIdUserAndIsReadFalseOrderByCreatedAtDesc(UUID userId);
-    int countAllByUserIdUserAndIsReadFalse(UUID userId);
+    List<Notification> findAllByUserIdUserAndReadFalseOrderByCreatedAtDesc(UUID userId);
+    int countAllByUserIdUserAndReadFalse(UUID userId);
     void deleteAllByUserIdUser(UUID userId);
 
 }

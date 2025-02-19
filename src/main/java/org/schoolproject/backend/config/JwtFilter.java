@@ -6,16 +6,21 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.schoolproject.backend.config.JwtUtil;
+import org.schoolproject.backend.dto.CustomUserDetails;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+
+@Component
 @RequiredArgsConstructor
+
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
@@ -48,7 +53,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         // Vérifier si l'utilisateur n'est pas déjà authentifié
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+            CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(email);
 
             if (userDetails != null) {
                 UsernamePasswordAuthenticationToken authenticationToken =

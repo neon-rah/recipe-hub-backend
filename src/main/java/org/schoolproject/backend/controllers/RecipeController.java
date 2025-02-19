@@ -4,6 +4,7 @@ import org.schoolproject.backend.entities.Recipe;
 import org.schoolproject.backend.services.RecipeService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -18,10 +19,12 @@ public class RecipeController {
     public RecipeController(RecipeService recipeService) {
         this.recipeService = recipeService;
     }
-    @PostMapping
-    public ResponseEntity<Recipe> createRecipe(@RequestBody Recipe recipe) {
+    @PostMapping(consumes = {"multipart/form-data"})
+    public ResponseEntity<Recipe> createRecipe(
+            @RequestPart("recipe") Recipe recipe,
+            @RequestPart(value = "recipeImage", required = false) MultipartFile recipeImage) {
         try{
-            return ResponseEntity.ok(recipeService.createRecipe(recipe));
+            return ResponseEntity.ok(recipeService.createRecipe(recipe, recipeImage));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -42,9 +45,9 @@ public class RecipeController {
         return ResponseEntity.ok(recipeService.findRecipesByUserId(userId));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Recipe> updateRecipe(@PathVariable int id, @RequestBody Recipe recipe) {
-        return ResponseEntity.ok(recipeService.updateRecipe(id, recipe));
+    @PutMapping(value = "/{id}", consumes = {"multipart/form-data"})
+    public ResponseEntity<Recipe> updateRecipe(@PathVariable int id, @RequestPart("recipe") Recipe recipe, @RequestPart(value = "recipeImage", required = false) MultipartFile recipeImage) {
+        return ResponseEntity.ok(recipeService.updateRecipe(id, recipe, recipeImage));
     }
 
     @DeleteMapping("/{id}")

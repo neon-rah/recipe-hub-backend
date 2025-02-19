@@ -2,9 +2,9 @@ package org.schoolproject.backend.controllers;
 
 import org.schoolproject.backend.entities.User;
 import org.schoolproject.backend.services.UserService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,7 +12,6 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/users")
-
 public class UserController {
     private final UserService userService;
 
@@ -20,12 +19,15 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user) {
-        User createdUser = userService.createUser(user);
+    // 📌 Création d'un utilisateur avec upload d'image
+    @PostMapping(consumes = {"multipart/form-data"})
+    public ResponseEntity<User> createUser(
+            @RequestPart("user") User user,
+            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
+
+        User createdUser = userService.createUser(user, profileImage);
         return ResponseEntity.ok(createdUser);
     }
-
 
     @GetMapping("/{id}")
     public ResponseEntity<User> findUserById(@PathVariable UUID id) {
@@ -33,7 +35,6 @@ public class UserController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-
 
     @GetMapping("/email/{email}")
     public ResponseEntity<User> findUserByEmail(@PathVariable String email) {
@@ -44,23 +45,24 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<List<User>> findAllUsers() {
-        List<User> users = userService.findAllUsers();
-        return ResponseEntity.ok(users);
+        return ResponseEntity.ok(userService.findAllUsers());
     }
-
 
     @GetMapping("/exists/{email}")
     public ResponseEntity<Boolean> existsUserByEmail(@PathVariable String email) {
         return ResponseEntity.ok(userService.existsUserByEmail(email));
     }
 
+    // 📌 Mise à jour d'un utilisateur avec image de profil
+    @PutMapping(value = "/{id}", consumes = {"multipart/form-data"})
+    public ResponseEntity<User> updateUser(
+            @PathVariable UUID id,
+            @RequestPart("user") User updatedUser,
+            @RequestPart(value = "profileImage", required = false) MultipartFile newProfileImage) {
 
-    @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable UUID id, @RequestBody User updatedUser) {
-        User user = userService.updateUser(id, updatedUser);
+        User user = userService.updateUser(id, updatedUser, newProfileImage);
         return ResponseEntity.ok(user);
     }
-
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
@@ -68,12 +70,10 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-
     @PostMapping("/{id}/verify-password")
     public ResponseEntity<Boolean> verifyPassword(@PathVariable UUID id, @RequestBody String password) {
         return ResponseEntity.ok(userService.verifyPassword(id, password));
     }
-
 
     @PutMapping("/{id}/change-password")
     public ResponseEntity<Void> changePassword(@PathVariable UUID id, @RequestBody String newPassword) {

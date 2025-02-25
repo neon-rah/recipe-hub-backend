@@ -3,13 +3,17 @@ package org.schoolproject.backend.services.impl;
 import jakarta.transaction.Transactional;
 import org.schoolproject.backend.dto.NotificationDTO;
 import org.schoolproject.backend.entities.Notification;
+import org.schoolproject.backend.entities.User;
 import org.schoolproject.backend.mappers.NotificationMapper;
 import org.schoolproject.backend.repositories.NotificationRepository;
 import org.schoolproject.backend.repositories.UserRepository;
 import org.schoolproject.backend.services.NotificationService;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -19,13 +23,15 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
     private final NotificationMapper notificationMapper; // Utilisation du mapper
+    private final SimpMessagingTemplate messagingTemplate;
 
     public NotificationServiceImpl(NotificationRepository notificationRepository,
                                    UserRepository userRepository,
-                                   NotificationMapper notificationMapper) {
+                                   NotificationMapper notificationMapper, SimpMessagingTemplate messagingTemplate) {
         this.notificationRepository = notificationRepository;
         this.userRepository = userRepository;
         this.notificationMapper = notificationMapper;
+        this.messagingTemplate = messagingTemplate;
     }
 
     @Override
@@ -83,5 +89,84 @@ public class NotificationServiceImpl implements NotificationService {
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new IllegalArgumentException("Notification not found"));
         return notificationMapper.toDTO(notification);  // Retourne le DTO de la notification
+    }
+
+    /**
+     * Envoie une notification lorsqu'un utilisateur suit un autre utilisateur.
+     * @param followerId ID de l'utilisateur qui suit
+     * @param followedId ID de l'utilisateur suivi
+     */
+    @Override
+    @Transactional
+    public void sendFollowNotification(UUID followerId, UUID followedId) {
+        Optional<User> followerOpt = userRepository.findById(followerId);
+        Optional<User> followedOpt = userRepository.findById(followedId);
+
+        if (followerOpt.isEmpty() || followedOpt.isEmpty()) {
+            throw new IllegalArgumentException("User not found");
+        }
+
+        User follower = followerOpt.get();
+        User followed = followedOpt.get();
+
+        String title = "New follower";
+        String message = follower.getFirstName() != null ? follower.getFirstName() : " " + follower.getLastName() + " follow you.";
+
+        Notification notification = Notification.builder()
+                .user(followed)
+                .sender(follower)
+                .title(title)
+                .message(message)
+                .createdAt(LocalDateTime.now())
+                .read(false)
+                .relatedEntityId(follower.getIdUser().hashCode())
+                .entityType("user")
+                .build();
+
+        Notification savedNotification = notificationRepository.save(notification);
+
+        // Envoi via WebSocket
+        messagingTemplate.convertAndSend("/topic/notifications/" + followedId, savedNotification);
+    }
+
+
+    /**
+     * Envoie une notification à tous les abonnés lorsqu'un utilisateur publie une recette.
+     * @param userId ID de l'utilisateur qui publie
+     * @param recipeId ID de la recette publiée
+     * @param recipeTitle Titre de la recette
+     */
+    @Override
+    @Transactional
+    public void sendRecipePublicationNotification(UUID userId, int recipeId, String recipeTitle) {
+        Optional<User> userOpt = userRepository.findById(userId);
+
+        if (userOpt.isEmpty()) {
+            throw new IllegalArgumentException("User mpt found");
+        }
+
+        User author = userOpt.get();
+        List<User> followers = (List<User>) author.getFollowers(); // Récupère la liste des abonnés
+
+        String title = "New recipe";
+        String message = author.getFirstName() != null ? author.getFirstName() : " " + author.getLastName()  + " published a new recipe : " + recipeTitle;
+
+        for (User follower : followers) {
+            Notification notification = Notification.builder()
+                    .user(follower)
+                    .sender(author)
+                    .title(title)
+                    .message(message)
+                    .createdAt(LocalDateTime.now())
+                    .read(false)
+                    .relatedEntityId(recipeId)
+                    .entityType("recipe")
+                    .build();
+
+            Notification savedNotification = notificationRepository.save(notification);
+
+            // Envoi via WebSocket à chaque abonné
+            messagingTemplate.convertAndSend("/topic/notifications/" + follower.getIdUser(), savedNotification);
+        }
     }
 }

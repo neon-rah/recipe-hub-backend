@@ -6,6 +6,7 @@ import org.schoolproject.backend.entities.User;
 import org.schoolproject.backend.repositories.FollowerRepository;
 import org.schoolproject.backend.repositories.UserRepository;
 import org.schoolproject.backend.services.FollowerService;
+import org.schoolproject.backend.services.NotificationService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,10 +18,12 @@ public class FollowerServiceImpl implements FollowerService {
 
     private final FollowerRepository followerRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
-    public FollowerServiceImpl(FollowerRepository followerRepository, UserRepository userRepository) {
+    public FollowerServiceImpl(FollowerRepository followerRepository, UserRepository userRepository, NotificationService notificationService) {
         this.followerRepository = followerRepository;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -40,6 +43,7 @@ public class FollowerServiceImpl implements FollowerService {
         follow.setFollower(follower);
         follow.setFollowed(followed);
         followerRepository.save(follow);
+        notificationService.sendFollowNotification(followerId, followedId);
 
     }
 

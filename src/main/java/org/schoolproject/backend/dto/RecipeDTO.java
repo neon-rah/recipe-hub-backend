@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 public class RecipeDTO {
     private int id;
     private String title;
-    private String description;
+    private String description; 
     private String ingredients;
     private String preparation;
     private String category;

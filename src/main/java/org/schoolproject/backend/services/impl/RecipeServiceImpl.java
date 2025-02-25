@@ -6,6 +6,7 @@ import org.schoolproject.backend.entities.Recipe;
 import org.schoolproject.backend.mappers.RecipeMapper;
 import org.schoolproject.backend.repositories.RecipeRepository;
 import org.schoolproject.backend.services.FileStorageService;
+import org.schoolproject.backend.services.NotificationService;
 import org.schoolproject.backend.services.RecipeService;
 import org.schoolproject.backend.specifications.RecipeSpecification;
 import org.springframework.data.jpa.domain.Specification;
@@ -23,11 +24,13 @@ public class RecipeServiceImpl implements RecipeService {
     private final RecipeRepository recipeRepository;
     private final FileStorageService fileStorageService;
     private final RecipeMapper recipeMapper;
+    private final NotificationService notificationService;
 
-    public RecipeServiceImpl(RecipeRepository recipeRepository, FileStorageService fileStorageService, RecipeMapper recipeMapper) {
+    public RecipeServiceImpl(RecipeRepository recipeRepository, FileStorageService fileStorageService, RecipeMapper recipeMapper, NotificationService notificationService) {
         this.recipeRepository = recipeRepository;
         this.fileStorageService = fileStorageService;
         this.recipeMapper = recipeMapper;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -44,6 +47,10 @@ public class RecipeServiceImpl implements RecipeService {
 
         // Sauvegarder l'entité et retourner le DTO
         Recipe savedRecipe = recipeRepository.save(recipe);
+
+        notificationService.sendRecipePublicationNotification(recipe.getUser().getIdUser(),recipe.getIdRecipe(), recipe.getTitle());
+
+
         return recipeMapper.toDto(savedRecipe);
     }
 

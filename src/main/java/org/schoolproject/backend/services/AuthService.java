@@ -3,7 +3,9 @@ package org.schoolproject.backend.services;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.schoolproject.backend.dto.UserDTO;
 import org.schoolproject.backend.entities.User;
+import org.schoolproject.backend.mappers.UserMapper;
 import org.schoolproject.backend.repositories.UserRepository;
 import org.schoolproject.backend.config.JwtUtil;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,6 +25,7 @@ public class AuthService {
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
 
     /**
      * Inscription d'un utilisateur

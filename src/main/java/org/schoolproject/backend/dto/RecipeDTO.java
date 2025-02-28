@@ -25,5 +25,5 @@ public class RecipeDTO {
 
 //    @JsonBackReference  // Empêche la boucle infinie
     @JsonIgnore
-    private UserDTO user; // Réutilisation de UserDTO
+    private UserDTO user; // Réutilisation de UserDTO, les informations de l'utilisateur qui a publier l'offre
 }

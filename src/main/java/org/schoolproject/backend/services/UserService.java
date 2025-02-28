@@ -22,5 +22,6 @@ public interface UserService {
 
     // ✅ Ajout de la méthode pour récupérer le profil utilisateur avec ses recettes
     Optional<UserDTO> getUserProfile(UUID userId);
+    UserDTO getUserProfileFromToken(String token);
 
 }

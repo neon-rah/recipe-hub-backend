@@ -2,6 +2,7 @@ package org.schoolproject.backend.services.impl;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.schoolproject.backend.config.JwtUtil;
 import org.schoolproject.backend.dto.UserDTO;
 import org.schoolproject.backend.entities.User;
 import org.schoolproject.backend.mappers.RecipeMapper;
@@ -26,6 +27,7 @@ public class UserServiceImpl implements UserService {
     private final FileStorageService fileStorageService;
     private final UserMapper userMapper;
     private final RecipeMapper recipeMapper;
+    private final JwtUtil jwtUtil;
 
     @Override
     @Transactional
@@ -43,6 +45,21 @@ public class UserServiceImpl implements UserService {
         user.setProfilePic(imageUrl);
 
         return userMapper.toDto(userRepository.save(user));
+    }
+
+    @Override
+    public UserDTO getUserProfileFromToken(String token) {
+        if (jwtUtil.validateToken(token)) {
+            String userEmail = jwtUtil.extractEmail(token);
+            Optional<User> user = userRepository.findByEmail(userEmail);
+            if (user.isPresent()) {
+                return  userMapper.toDto(user.get());
+            } else {
+                throw new RuntimeException("User not found");
+            }
+        } else {
+            throw new RuntimeException("Invalid token");
+        }
     }
 
     @Override

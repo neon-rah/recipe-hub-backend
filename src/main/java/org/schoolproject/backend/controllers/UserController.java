@@ -2,6 +2,7 @@ package org.schoolproject.backend.controllers;
 
 import org.schoolproject.backend.dto.UserDTO;
 import org.schoolproject.backend.services.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,7 +23,7 @@ public class UserController {
     @PostMapping(consumes = {"multipart/form-data"})
     public ResponseEntity<UserDTO> createUser(
             @RequestPart("user") UserDTO userDTO,
-            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
+            @RequestPart(value = "profilePic", required = false) MultipartFile profileImage) {
 
         UserDTO createdUser = userService.createUser(userDTO, profileImage);
         return ResponseEntity.ok(createdUser);
@@ -33,6 +34,20 @@ public class UserController {
         return userService.findUserById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<UserDTO> getUserProfile(@RequestHeader("Authorization") String token) {
+        // Supprimer le "Bearer " du token
+        String accessToken = token.substring(7);
+
+        // Vérifier et récupérer les informations de l'utilisateur via le token
+        try {
+            UserDTO user = userService.getUserProfileFromToken(accessToken);
+            return ResponseEntity.ok(user);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
     }
 
     @GetMapping("/email/{email}")

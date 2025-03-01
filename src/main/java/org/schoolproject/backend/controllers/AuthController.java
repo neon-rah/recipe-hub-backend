@@ -274,7 +274,7 @@ public class AuthController {
         }
     }
 
-    // Gestion des exceptions spécifiques
+  /*  // Gestion des exceptions spécifiques
     @ExceptionHandler(MissingServletRequestPartException.class)
     public ResponseEntity<ErrorResponse> handleMissingPartException(MissingServletRequestPartException ex) {
         ErrorResponse error = new ErrorResponse(
@@ -306,5 +306,5 @@ public class AuthController {
         );
         logger.error("Unexpected error occurred", ex);
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    }*/
 }

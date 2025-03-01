@@ -38,8 +38,8 @@ public class FileStorageService {
             }
 
             //  Vérifie la taille du fichier (max 5MB)
-            if (file.getSize() > 5 * 1024 * 1024) {
-                throw new IllegalArgumentException("La taille du fichier dépasse la limite de 5MB.");
+            if (file.getSize() > 10 * 1024 * 1024) {
+                throw new IllegalArgumentException("La taille du fichier dépasse la limite de 5MB. ");
             }
 
             //  Vérifie l'extension du fichier

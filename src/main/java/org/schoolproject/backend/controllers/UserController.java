@@ -2,18 +2,22 @@ package org.schoolproject.backend.controllers;
 
 import org.schoolproject.backend.dto.UserDTO;
 import org.schoolproject.backend.services.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/user")
 public class UserController {
     private final UserService userService;
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     public UserController(UserService userService) {
         this.userService = userService;
@@ -36,17 +40,29 @@ public class UserController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/profile")
-    public ResponseEntity<UserDTO> getUserProfile(@RequestHeader("Authorization") String token) {
-        // Supprimer le "Bearer " du token
-        String accessToken = token.substring(7);
+    @GetMapping("/profile") // Changement de "/profile" à "/user/profile"
+    public ResponseEntity<?> getUserProfile(@RequestHeader(value = "Authorization", required = false) String token) {
+        logger.info("Requête reçue pour récupérer le profil utilisateur");
 
-        // Vérifier et récupérer les informations de l'utilisateur via le token
+        if (token == null || !token.startsWith("Bearer ")) {
+            logger.warn("En-tête Authorization manquant ou mal formé: {}", token);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Missing or invalid Authorization header"));
+        }
+
         try {
+            String accessToken = token.substring(7);
+            logger.debug("AccessToken extrait: {}", accessToken);
             UserDTO user = userService.getUserProfileFromToken(accessToken);
             return ResponseEntity.ok(user);
+        } catch (IllegalArgumentException e) {
+            logger.warn("Erreur spécifique lors de la récupération du profil: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            logger.error("Erreur inattendue lors de la récupération du profil", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Internal server error"));
         }
     }
 

@@ -14,10 +14,11 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**") // Autorise toutes les routes
-                        .allowedOrigins("http://localhost:3000") // Autorise votre frontend
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Méthodes HTTP permises
-                        .allowedHeaders("*") // Autorise tous les en-têtes
-                        .allowCredentials(true); // Si vous utilisez des cookies ou des sessions
+                        .allowedOrigins("http://localhost:3000") // Votre frontend
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Inclut OPTIONS pour les preflight
+                        .allowedHeaders("Authorization", "Content-Type", "*") // Autorise tous les en-têtes, y compris Authorization
+                        .exposedHeaders("Set-Cookie") // Permet au frontend de voir Set-Cookie si nécessaire
+                        .allowCredentials(true); // Nécessaire pour les cookies avec withCredentials
             }
         };
     }

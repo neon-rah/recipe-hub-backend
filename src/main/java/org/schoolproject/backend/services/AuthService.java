@@ -118,47 +118,47 @@ public class AuthService {
     /**
      * Générer la réponse contenant UserDTO et Access Token
      */
-//    private Map<String, Object> generateAuthResponse(User user, HttpServletResponse response) {
-//        logger.info("Génération de la réponse d'authentification pour: {}", user.getEmail());
-//
-//        String accessToken = jwtUtil.generateAccessToken(user.getIdUser(), user.getEmail());
-//        String refreshToken = jwtUtil.generateRefreshToken(user.getIdUser(), user.getEmail());
-//        logger.debug("Tokens générés - accessToken: {}, refreshToken: {}", accessToken, refreshToken);
-//
-//        // Supprimer l'ancien cookie refreshToken s'il existe
-//        Cookie clearCookie = new Cookie("refreshToken", null);
-//        clearCookie.setPath("/");
-//        clearCookie.setHttpOnly(true);
-//        clearCookie.setSecure(false); // Désactivé pour tests locaux
-//        clearCookie.setMaxAge(0); // Expire immédiatement
-//        response.addCookie(clearCookie);
-//        logger.debug("Ancien cookie refreshToken supprimé");
-//
-//        // Ajouter le nouveau cookie refreshToken
-//        Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
-//        refreshTokenCookie.setHttpOnly(true);
-//        refreshTokenCookie.setSecure(false); // Désactivé pour tests locaux
-//        refreshTokenCookie.setPath("/");
-//        refreshTokenCookie.setAttribute("SameSite", "Lax"); // ou "None" avec Secure=true en prod
-//        refreshTokenCookie.setMaxAge(7 * 24 * 60 * 60); // 7 jours
-//        response.addCookie(refreshTokenCookie);
-//        logger.debug("Nouveau cookie refreshToken ajouté: value={}, path={}, maxAge={}",
-//                refreshTokenCookie.getValue(), refreshTokenCookie.getPath(), refreshTokenCookie.getMaxAge());
-//
-//        Map<String, Object> responseBody = new HashMap<>();
-//        responseBody.put("accessToken", accessToken);
-//        responseBody.put("user", userMapper.toDto(user));
-//        logger.debug("Réponse préparée: {}", responseBody);
-//
-//        return responseBody;
-//    }
+    private Map<String, Object> generateAuthResponse(User user, HttpServletResponse response) {
+        logger.info("Génération de la réponse d'authentification pour: {}", user.getEmail());
+
+        String accessToken = jwtUtil.generateAccessToken(user.getIdUser(), user.getEmail());
+        String refreshToken = jwtUtil.generateRefreshToken(user.getIdUser(), user.getEmail());
+        logger.debug("Tokens générés - accessToken: {}, refreshToken: {}", accessToken, refreshToken);
+
+        // Supprimer l'ancien cookie refreshToken s'il existe
+        Cookie clearCookie = new Cookie("refreshToken", null);
+        clearCookie.setPath("/");
+        clearCookie.setHttpOnly(true);
+        clearCookie.setSecure(false); // Désactivé pour tests locaux
+        clearCookie.setMaxAge(0); // Expire immédiatement
+        response.addCookie(clearCookie);
+        logger.debug("Ancien cookie refreshToken supprimé");
+
+        // Ajouter le nouveau cookie refreshToken
+        Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
+        refreshTokenCookie.setHttpOnly(true);
+        refreshTokenCookie.setSecure(false); // Désactivé pour tests locaux
+        refreshTokenCookie.setPath("/");
+        refreshTokenCookie.setAttribute("SameSite", "Lax"); // ou "None" avec Secure=true en prod
+        refreshTokenCookie.setMaxAge(7 * 24 * 60 * 60); // 7 jours
+        response.addCookie(refreshTokenCookie);
+        logger.debug("Nouveau cookie refreshToken ajouté: value={}, path={}, maxAge={}",
+                refreshTokenCookie.getValue(), refreshTokenCookie.getPath(), refreshTokenCookie.getMaxAge());
+
+        Map<String, Object> responseBody = new HashMap<>();
+        responseBody.put("accessToken", accessToken);
+        responseBody.put("user", userMapper.toDto(user));
+        logger.debug("Réponse préparée: {}", responseBody);
+
+        return responseBody;
+    }
 
 
 
     /**
      * Générer la réponse contenant UserDTO, Access Token et Refresh Token
      */
-    private Map<String, Object> generateAuthResponse(User user, HttpServletResponse response) {
+   /* private Map<String, Object> generateAuthResponse(User user, HttpServletResponse response) {
         logger.info("Génération de la réponse d'authentification pour: {}", user.getEmail());
 
         String accessToken = jwtUtil.generateAccessToken(user.getIdUser(), user.getEmail());
@@ -173,7 +173,7 @@ public class AuthService {
         logger.debug("Réponse préparée: {}", responseBody);
 
         return responseBody;
-    }
+    }*/
     public Map<String, String> logout(HttpServletResponse response) {
         // Supprimer le cookie du Refresh Token
         Cookie refreshTokenCookie = new Cookie("refreshToken", "");

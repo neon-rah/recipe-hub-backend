@@ -60,7 +60,7 @@ public class FileStorageService {
             // Copie du fichier dans le dossier de stockage
             Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
 
-            //  Retourne l’URL relative pour stockage en base de données
+            //  Retourne l’URL relative pour stockage en base de données, ficier uploader dans le srver xampp /upload
             return "/uploads/" + fileName;
         } catch (IOException e) {
             throw new RuntimeException("Échec du stockage du fichier.", e);

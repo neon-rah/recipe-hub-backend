@@ -62,12 +62,12 @@ public class User {
             joinColumns = @JoinColumn(name = "followed_id"),
             inverseJoinColumns = @JoinColumn(name = "follower_id")
     )
-    private Set<User> followers = new HashSet<>();
+    private List<User> followers = new ArrayList<>();
 
     // Utilisateurs suivis par cet utilisateur
     @JsonIgnore
     @ManyToMany(mappedBy = "followers")
-    private Set<User> following = new HashSet<>();
+    private List<User> following = new ArrayList<>();
 
 
 }

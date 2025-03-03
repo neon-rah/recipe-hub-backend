@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface SavedRecipeService {
-    SavedRecipe addSavedRecipe(UUID userId, int recipeId);
+    SavedRecipe toggleSavedRecipe(UUID userId, int recipeId);
     void removeSavedRecipe(UUID userId, int recipeId);
     List<SavedRecipe> getSavedRecipes(UUID userId);
     boolean isSavedRecipe(UUID userId, int recipeId);

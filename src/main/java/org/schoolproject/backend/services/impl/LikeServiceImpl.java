@@ -30,7 +30,7 @@ public class LikeServiceImpl implements LikeService {
 
     @Override
     @Transactional
-    public Like createLike(UUID userId, int recipeId) {
+    public Like toggleLike(UUID userId, int recipeId) {
         User user = userRepository.findByIdUser(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         Recipe recipe = recipeRepository.findById(recipeId)

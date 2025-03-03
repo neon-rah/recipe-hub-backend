@@ -21,6 +21,26 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(response);
     }
 
+    @ExceptionHandler(SecurityException.class)
+    public ResponseEntity<Map<String, String>> securityExceptionHandler(SecurityException ex) {
+        Map<String, String> response = new HashMap<>();
+        String message = ex.getMessage();
+        HttpStatus status;
+
+        // Différencier les cas d'authentification (401) et d'autorisation (403)
+        if (message.contains("token") || message.contains("Authorization")) {
+            status = HttpStatus.UNAUTHORIZED; // 401 pour token invalide ou manquant
+            response.put("error", "Unauthorized");
+        } else {
+            status = HttpStatus.FORBIDDEN; // 403 pour manque de permission
+            response.put("error", "Forbidden");
+        }
+
+        response.put("status", String.valueOf(status.value()));
+        response.put("message", message);
+        return ResponseEntity.status(status).body(response);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> generalExceptionHandler(Exception ex) {
         Map<String, String> response = new HashMap<>();

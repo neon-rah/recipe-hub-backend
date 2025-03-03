@@ -36,8 +36,8 @@ public class Recipe {
     @Column(nullable = false, length = 30)
     private String category;
 
-    @Column(nullable = false, length = 30)
-    private String region;
+//    @Column(nullable = false, length = 30)
+//    private String region;
 
     private String image;
 

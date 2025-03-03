@@ -142,11 +142,11 @@ public class NotificationServiceImpl implements NotificationService {
         Optional<User> userOpt = userRepository.findById(userId);
 
         if (userOpt.isEmpty()) {
-            throw new IllegalArgumentException("User mpt found");
+            throw new IllegalArgumentException("User not found");
         }
 
         User author = userOpt.get();
-        List<User> followers = (List<User>) author.getFollowers(); // Récupère la liste des abonnés
+        List<User> followers = author.getFollowers(); // Récupère la liste des abonnés
 
         String title = "New recipe";
         String message = author.getFirstName() != null ? author.getFirstName() : " " + author.getLastName()  + " published a new recipe : " + recipeTitle;

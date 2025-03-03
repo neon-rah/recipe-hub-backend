@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface LikeService {
-    Like createLike(UUID userId, int recipeId);
+    Like toggleLike(UUID userId, int recipeId);
     void deleteLike(UUID userId, int recipeId);
     boolean isLikedByUser(UUID userId, int recipeId);
     List<Like> getLikesByUser(UUID userId);

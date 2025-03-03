@@ -23,6 +23,7 @@ public class UserDTO {
     private String profilePic;
     private LocalDateTime created;
 
+    @JsonIgnore
     @JsonManagedReference  // Empêche la boucle infinie
     private List<RecipeDTO> recipes;  // Champ facultatif
 }

@@ -198,4 +198,11 @@ public class RecipeServiceImpl implements RecipeService {
 
         return recipes.map(recipeMapper::toDto);
     }
+
+    @Override
+    public Page<RecipeDTO> searchRecipesExcludingUser(UUID userId, String query, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("updatedDate").descending());
+        Page<Recipe> recipes = recipeRepository.findByUserIdUserNotAndTitleOrIngredientsContainingIgnoreCase(userId, query, pageable);
+        return recipes.map(recipeMapper::toDto);
+    }
 }

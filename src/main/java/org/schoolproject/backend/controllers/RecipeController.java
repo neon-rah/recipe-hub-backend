@@ -145,6 +145,23 @@ public class RecipeController {
         return ResponseEntity.ok(recipeService.searchRecipes(title, ingredient, category));
     }
 
+    // RecipeController.java
+    @GetMapping("/public/search")
+    public ResponseEntity<Page<RecipeDTO>> searchPublicRecipes(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size,
+            @RequestParam String query,
+            HttpServletRequest request
+    ) {
+        String token = jwtUtil.extractToken(request);
+        if (!jwtUtil.validateToken(token)) {
+            throw new SecurityException("Invalid JWT token");
+        }
+        UUID userId = jwtUtil.extractUserId(token);
+        Page<RecipeDTO> recipes = recipeService.searchRecipesExcludingUser(userId, query, page, size);
+        return ResponseEntity.ok(recipes);
+    }
+
     // récupérer les recettes avec les informations de l'utilisateur
     @GetMapping("/user-info/{userId}")
     public ResponseEntity<List<RecipeDTO>> findRecipesWithUserInfo(@PathVariable UUID userId) {

@@ -26,5 +26,17 @@ public interface RecipeRepository extends JpaRepository<Recipe, Integer>, JpaSpe
             "(LOWER(r.title) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
             "LOWER(r.ingredients) LIKE LOWER(CONCAT('%', :query, '%')))")
     Page<Recipe> findByUserIdUserNotAndTitleOrIngredientsContainingIgnoreCase(UUID userId, String query, Pageable pageable);
+
+
+    // Nouvelle méthode pour filtrer par catégorie
+    Page<Recipe> findByUserIdUserNotAndCategory(UUID userId, String category, Pageable pageable);
+
+    // Nouvelle méthode pour recherche + catégorie
+    @Query("SELECT r FROM Recipe r WHERE r.user.idUser != :userId AND " +
+            "(LOWER(r.title) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+            "LOWER(r.ingredients) LIKE LOWER(CONCAT('%', :query, '%'))) AND " +
+            "r.category = :category")
+    Page<Recipe> findByUserIdUserNotAndTitleOrIngredientsContainingIgnoreCaseAndCategory(
+            UUID userId, String query, String category, Pageable pageable);
 //    List<Recipe> findAllByRegion(String region);
 }

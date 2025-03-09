@@ -111,7 +111,7 @@ public class RecipeController {
     public ResponseEntity<List<RecipeDTO>> findRecipeByUserId(@PathVariable UUID userId) {
         return ResponseEntity.ok(recipeService.findRecipesByUserId(userId));
     }
-    @GetMapping("/public")
+    /*@GetMapping("/public")
     public ResponseEntity<Page<RecipeDTO>> getPublicRecipes(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int size,
@@ -124,7 +124,7 @@ public class RecipeController {
 
         Page<RecipeDTO> recipes = recipeService.findRecipesExcludingUser(userId, page, size);
         return ResponseEntity.ok(recipes);
-    }
+    }*/
 
     // RecipeController.java (extrait)
     @DeleteMapping("/{id}")
@@ -145,12 +145,11 @@ public class RecipeController {
         return ResponseEntity.ok(recipeService.searchRecipes(title, ingredient, category));
     }
 
-    // RecipeController.java
-    @GetMapping("/public/search")
-    public ResponseEntity<Page<RecipeDTO>> searchPublicRecipes(
+    @GetMapping("/public")
+    public ResponseEntity<Page<RecipeDTO>> getPublicRecipes(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int size,
-            @RequestParam String query,
+            @RequestParam(required = false) String category,
             HttpServletRequest request
     ) {
         String token = jwtUtil.extractToken(request);
@@ -158,7 +157,28 @@ public class RecipeController {
             throw new SecurityException("Invalid JWT token");
         }
         UUID userId = jwtUtil.extractUserId(token);
-        Page<RecipeDTO> recipes = recipeService.searchRecipesExcludingUser(userId, query, page, size);
+        Page<RecipeDTO> recipes = category != null && !category.equals("All")
+                ? recipeService.findRecipesExcludingUserByCategory(userId, category, page, size)
+                : recipeService.findRecipesExcludingUser(userId, page, size);
+        return ResponseEntity.ok(recipes);
+    }
+
+    @GetMapping("/public/search")
+    public ResponseEntity<Page<RecipeDTO>> searchPublicRecipes(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size,
+            @RequestParam String query,
+            @RequestParam(required = false) String category,
+            HttpServletRequest request
+    ) {
+        String token = jwtUtil.extractToken(request);
+        if (!jwtUtil.validateToken(token)) {
+            throw new SecurityException("Invalid JWT token");
+        }
+        UUID userId = jwtUtil.extractUserId(token);
+        Page<RecipeDTO> recipes = category != null && !category.equals("All")
+                ? recipeService.searchRecipesExcludingUserByCategory(userId, query, category, page, size)
+                : recipeService.searchRecipesExcludingUser(userId, query, page, size);
         return ResponseEntity.ok(recipes);
     }
 

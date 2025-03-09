@@ -205,4 +205,25 @@ public class RecipeServiceImpl implements RecipeService {
         Page<Recipe> recipes = recipeRepository.findByUserIdUserNotAndTitleOrIngredientsContainingIgnoreCase(userId, query, pageable);
         return recipes.map(recipeMapper::toDto);
     }
+
+    @Override
+    public Page<RecipeDTO> findRecipesExcludingUserByCategory(UUID userId, String category, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("updatedDate").descending());
+        if (category == null || category.equals("All")) {
+            return findRecipesExcludingUser(userId, page, size); // Sans filtre si "All"
+        }
+        Page<Recipe> recipes = recipeRepository.findByUserIdUserNotAndCategory(userId, category, pageable);
+        return recipes.map(recipeMapper::toDto);
+    }
+
+    @Override
+    public Page<RecipeDTO> searchRecipesExcludingUserByCategory(UUID userId, String query, String category, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("updatedDate").descending());
+        if (category == null || category.equals("All")) {
+            return searchRecipesExcludingUser(userId, query, page, size); // Sans filtre si "All"
+        }
+        Page<Recipe> recipes = recipeRepository.findByUserIdUserNotAndTitleOrIngredientsContainingIgnoreCaseAndCategory(
+                userId, query, category, pageable);
+        return recipes.map(recipeMapper::toDto);
+    }
 }

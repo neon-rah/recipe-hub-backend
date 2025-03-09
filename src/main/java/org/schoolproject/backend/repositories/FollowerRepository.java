@@ -3,6 +3,7 @@ package org.schoolproject.backend.repositories;
 import org.schoolproject.backend.entities.Follower;
 import org.schoolproject.backend.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -20,6 +21,9 @@ public interface FollowerRepository extends JpaRepository<Follower, Integer> {
     List<Follower> findAllByFollowed(User followed);
     int countByFollower(User follower);
     int countByFollowed(User followed);
+
+    @Query("SELECT u FROM User u WHERE LOWER(u.lastName) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(u.firstName) LIKE LOWER(CONCAT('%', :query, '%'))")
+    List<User> findByLastNameContainingIgnoreCaseOrFirstNameContainingIgnoreCase(String query, String query2);
    /* List<Follower> findAllByFollowerUserId(UUID followerId);
     List<Follower> findAllByFollowedUserId(UUID followedId);
     int countByFollowerUserId(UUID followerId);

@@ -110,7 +110,7 @@ public class NotificationServiceImpl implements NotificationService {
         User followed = followedOpt.get();
 
         String title = "New follower";
-        String message = follower.getFirstName() != null ? follower.getFirstName() : " " + follower.getLastName() + " follow you.";
+        String message =( (follower.getFirstName() != null) ? follower.getFirstName()+" "+follower.getLastName() : follower.getLastName() ) + " follow you.";
 
         Notification notification = Notification.builder()
                 .user(followed)
@@ -127,6 +127,15 @@ public class NotificationServiceImpl implements NotificationService {
 
         // Envoi via WebSocket
         messagingTemplate.convertAndSend("/topic/notifications/" + followedId, savedNotification);
+    }
+
+    @Override
+    @Transactional
+    public void markAsRead(int notificationId) {
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new IllegalArgumentException("Notification not found"));
+        notification.setRead(true);
+        notificationRepository.save(notification);
     }
 
 
@@ -149,7 +158,7 @@ public class NotificationServiceImpl implements NotificationService {
         List<User> followers = author.getFollowers(); // Récupère la liste des abonnés
 
         String title = "New recipe";
-        String message = author.getFirstName() != null ? author.getFirstName() : " " + author.getLastName()  + " published a new recipe : " + recipeTitle;
+        String message = (author.getFirstName() != null ? author.getFirstName() +" " + author.getLastName() : author.getLastName() )+ " published a new recipe : " + recipeTitle;
 
         for (User follower : followers) {
             Notification notification = Notification.builder()

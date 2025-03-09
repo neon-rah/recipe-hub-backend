@@ -8,9 +8,11 @@ import org.schoolproject.backend.repositories.UserRepository;
 import org.schoolproject.backend.services.FollowerService;
 import org.schoolproject.backend.services.NotificationService;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Sort;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 
@@ -100,4 +102,35 @@ public class FollowerServiceImpl implements FollowerService {
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
         return followerRepository.countByFollower(user);
     }
+
+    // Nouvelle méthode pour suggestions (utilisateurs non suivis)
+    @Override
+    public List<User> getSuggestedUsers(UUID userId) {
+        User currentUser = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        List<User> allUsers = userRepository.findAll(Sort.by(Sort.Direction.ASC, "lastName", "firstName"));
+        List<UUID> followingIds = followerRepository.findAllByFollower(currentUser)
+                .stream()
+                .map(follower -> follower.getFollowed().getIdUser())
+                .collect(Collectors.toList());
+        return allUsers.stream()
+                .filter(user -> !user.getIdUser().equals(userId)) // Exclure l'utilisateur lui-même
+                .filter(user -> !followingIds.contains(user.getIdUser())) // Exclure les utilisateurs suivis
+                .collect(Collectors.toList());
+    }
+
+    // Nouvelle méthode pour recherche par nom/prénom
+    @Override
+    public List<User> searchUsers(UUID excludeUserId, String query) {
+        return userRepository.findByLastNameContainingIgnoreCaseOrFirstNameContainingIgnoreCase(query, query)
+                .stream()
+                .filter(user -> !user.getIdUser().equals(excludeUserId))
+                .sorted((u1, u2) -> {
+                    int lastNameCompare = u1.getLastName().compareToIgnoreCase(u2.getLastName());
+                    return lastNameCompare != 0 ? lastNameCompare : u1.getFirstName().compareToIgnoreCase(u2.getFirstName());
+                })
+                .collect(Collectors.toList());
+    }
+
+
 }

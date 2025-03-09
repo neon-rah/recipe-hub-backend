@@ -64,6 +64,12 @@ public class NotificationController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @PutMapping("/{notifId}/mark-read")
+    public ResponseEntity<Void> markAsRead(@PathVariable int notifId) {
+        notificationService.markAsRead(notifId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
     // Récupérer une notification spécifique par son ID
     @GetMapping("/notification/{notifId}")
     public ResponseEntity<NotificationDTO> getNotificationById(@PathVariable int notifId) {

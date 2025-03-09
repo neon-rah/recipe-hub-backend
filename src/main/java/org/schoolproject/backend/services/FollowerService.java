@@ -1,6 +1,7 @@
 package org.schoolproject.backend.services;
 
 import org.schoolproject.backend.entities.Follower;
+import org.schoolproject.backend.entities.User;
 
 import java.util.List;
 import java.util.UUID;
@@ -13,4 +14,6 @@ List<Follower> getFollowers(UUID userId);
 List<Follower> getFollowing (UUID userId);
 int getFollowerCount(UUID userId);
 int getFollowingCount(UUID userId);
+    List<User> getSuggestedUsers(UUID userId); // Nouvelles méthodes
+    List<User> searchUsers(UUID excludeUserId, String query);
 }

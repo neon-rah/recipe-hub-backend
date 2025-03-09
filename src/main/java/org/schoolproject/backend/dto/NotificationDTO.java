@@ -15,6 +15,7 @@ import java.util.UUID;
 public class NotificationDTO {
 
     private int idNotif;  // Identifiant de la notification
+    private UUID idUser;
     private UUID senderId;  // ID de l'expéditeur (UUID)
     private String senderLastName;  // Nom de famille de l'expéditeur
     private String senderFirstName;  // Prénom de l'expéditeur
@@ -24,6 +25,6 @@ public class NotificationDTO {
     private String message;  // Message de la notification
     private LocalDateTime createdAt;  // Date de création de la notification
     private boolean read;  // Statut de la notification (lue ou non)
-    private Integer relatedEntityId;  // ID de l'entité liée (utilisateur ou recette)
+    private Integer relatedEntityId;  // ID de l'entité liée (recette) ou null si user
     private String entityType;  // Type d'entité (user ou recipe)
 }

@@ -11,6 +11,7 @@ public interface NotificationMapper {
 
     // Mappage entre l'entité Notification et le DTO NotificationDTO
     @Mappings({
+            @Mapping ( source = "user.idUser", target = "idUser"),
             @Mapping(source = "sender.idUser", target = "senderId"),  // Utilisation de sender au lieu de user
             @Mapping(source = "sender.lastName", target = "senderLastName"),
             @Mapping(source = "sender.firstName", target = "senderFirstName"),
@@ -19,17 +20,18 @@ public interface NotificationMapper {
             @Mapping(source = "title", target = "title"),
             @Mapping(source = "message", target = "message"),
             @Mapping(source = "createdAt", target = "createdAt"),
-            @Mapping(source = "read", target = "read")  // Utilisation de la propriété isRead dans l'entité
+            @Mapping(source = "read", target = "read")  // Utilisation de la propriété read dans l'entité
     })
     NotificationDTO toDTO(Notification notification);
 
     // Mappage inverse du DTO vers l'entité
     @Mappings({
+            @Mapping(source = "idUser", target = "user.idUser"),
             @Mapping(source = "senderId", target = "sender.idUser"),  // Mappage vers l'objet sender
             @Mapping(source = "title", target = "title"),
             @Mapping(source = "message", target = "message"),
             @Mapping(source = "createdAt", target = "createdAt"),
-            @Mapping(source = "read", target = "read")  // Utilisation de la propriété isRead dans l'entité
+            @Mapping(source = "read", target = "read")  // Utilisation de la propriété read dans l'entité
     })
     Notification toEntity(NotificationDTO notificationDTO);
 }

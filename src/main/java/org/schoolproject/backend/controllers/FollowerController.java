@@ -1,5 +1,6 @@
 package org.schoolproject.backend.controllers;
 
+import org.schoolproject.backend.entities.User;
 import org.schoolproject.backend.services.FollowerService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -61,5 +62,18 @@ public class FollowerController {
     @GetMapping("/{userId}/following/count")
     public ResponseEntity<Integer> getFollowingCount(@PathVariable UUID userId) {
         return ResponseEntity.ok(followerService.getFollowingCount(userId));
+    }
+
+    @GetMapping("/{userId}/suggestions")
+    public ResponseEntity<List<User>> getSuggestedUsers(@PathVariable UUID userId) {
+        return ResponseEntity.ok(followerService.getSuggestedUsers(userId));
+    }
+
+    @GetMapping("/{userId}/search")
+    public ResponseEntity<List<User>> searchUsers(
+            @PathVariable UUID userId,
+            @RequestParam String query
+    ) {
+        return ResponseEntity.ok(followerService.searchUsers(userId, query));
     }
 }

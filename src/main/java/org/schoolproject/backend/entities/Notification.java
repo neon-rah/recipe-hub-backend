@@ -38,11 +38,11 @@ public class Notification {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "is_read", nullable = false)
+    @Column(name = "is_read", columnDefinition = "false")
     private boolean read = false;
 
     @Column(name = "related_entity_id")
-    private Integer relatedEntityId;  // Par exemple, ID du profil ou de la recette
+    private Integer relatedEntityId;  // Par exemple, ID de la recette, null si entity-type user
 
     @Column(name = "entity_type", length = 50)
     private String entityType;  // 'user' ou 'recipe'

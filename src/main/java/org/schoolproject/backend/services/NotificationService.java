@@ -15,5 +15,6 @@ public interface NotificationService {
     void deleteAllNotifications(UUID userId);
     NotificationDTO getNotificationById(int notificationId);  // Nouvelle méthode pour obtenir une notification spécifique
      void sendFollowNotification(UUID followerId, UUID followedId);
+    void markAsRead(int notificationId);
     void sendRecipePublicationNotification(UUID userId, int recipeId, String recipeTitle);
 }

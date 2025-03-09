@@ -21,4 +21,7 @@ public interface RecipeService {
     List<RecipeDTO> findRecipesWithUserInfo(UUID userId);
     Page<RecipeDTO> findRecipesExcludingUser(UUID userId, int page, int size);
     Page<RecipeDTO> searchRecipesExcludingUser(UUID userId, String query, int page, int size);
+
+    Page<RecipeDTO> findRecipesExcludingUserByCategory(UUID userId, String category, int page, int size);
+    Page<RecipeDTO> searchRecipesExcludingUserByCategory(UUID userId, String query, String category, int page, int size);
 }

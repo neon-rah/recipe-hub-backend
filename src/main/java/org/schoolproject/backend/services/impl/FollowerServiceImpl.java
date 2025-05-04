@@ -10,7 +10,9 @@ import org.schoolproject.backend.services.NotificationService;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Sort;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -130,6 +132,12 @@ public class FollowerServiceImpl implements FollowerService {
                     return lastNameCompare != 0 ? lastNameCompare : u1.getFirstName().compareToIgnoreCase(u2.getFirstName());
                 })
                 .collect(Collectors.toList());
+    }
+    @Override
+    public List<User> getRandomSuggestedUsers(UUID userId, int limit) {
+        List<User> suggestedUsers = getSuggestedUsers(userId);
+        Collections.shuffle(suggestedUsers, new Random());
+        return suggestedUsers.stream().limit(limit).collect(Collectors.toList());
     }
 
 

@@ -38,5 +38,9 @@ public interface RecipeRepository extends JpaRepository<Recipe, Integer>, JpaSpe
             "r.category = :category")
     Page<Recipe> findByUserIdUserNotAndTitleOrIngredientsContainingIgnoreCaseAndCategory(
             UUID userId, String query, String category, Pageable pageable);
-//    List<Recipe> findAllByRegion(String region);
+
+    List<Recipe> findAllByUserIdUserNot(UUID userId);
+
+    // Nouvelle méthode avec tri par updatedDate DESC
+    List<Recipe> findAllByUserIdUserOrderByUpdatedDateDesc(UUID userId);
 }

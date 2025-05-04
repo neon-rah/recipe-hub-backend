@@ -25,6 +25,7 @@ public class NotificationDTO {
     private String message;  // Message de la notification
     private LocalDateTime createdAt;  // Date de création de la notification
     private boolean read;  // Statut de la notification (lue ou non)
+    private boolean seen;
     private Integer relatedEntityId;  // ID de l'entité liée (recette) ou null si user
     private String entityType;  // Type d'entité (user ou recipe)
 }

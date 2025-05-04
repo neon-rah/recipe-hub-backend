@@ -3,9 +3,13 @@ package org.schoolproject.backend.entities;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "recipes")
@@ -52,4 +56,14 @@ public class Recipe {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    // Relation avec Likes
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private List<Like> likes = new ArrayList<>();
+
+    // Relation avec SavedRecipes
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private List<SavedRecipe> savedRecipes = new ArrayList<>();
 }

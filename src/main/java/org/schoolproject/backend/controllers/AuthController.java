@@ -56,7 +56,7 @@ public class AuthController {
                 throw new IllegalArgumentException("Missing required fields: lastName, firstName, address, email, or password");
             }
 
-            // Créer UserDTO manuellement
+            // Créer UserDTO
             UserDTO userDTO = new UserDTO();
             userDTO.setLastName(lastName);
             userDTO.setFirstName(firstName);

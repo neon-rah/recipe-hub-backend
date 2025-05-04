@@ -16,4 +16,5 @@ int getFollowerCount(UUID userId);
 int getFollowingCount(UUID userId);
     List<User> getSuggestedUsers(UUID userId); // Nouvelles méthodes
     List<User> searchUsers(UUID excludeUserId, String query);
+    List<User> getRandomSuggestedUsers(UUID userId, int limit);
 }

@@ -24,9 +24,14 @@ public interface FollowerRepository extends JpaRepository<Follower, Integer> {
 
     @Query("SELECT u FROM User u WHERE LOWER(u.lastName) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(u.firstName) LIKE LOWER(CONCAT('%', :query, '%'))")
     List<User> findByLastNameContainingIgnoreCaseOrFirstNameContainingIgnoreCase(String query, String query2);
-   /* List<Follower> findAllByFollowerUserId(UUID followerId);
-    List<Follower> findAllByFollowedUserId(UUID followedId);
-    int countByFollowerUserId(UUID followerId);
-    int countByFollowedUserId(UUID followedId);*/
+    Optional<Follower> findByFollowerIdUserAndFollowedIdUser(UUID followerId, UUID followedId);
+    List<Follower> findAllByFollowedIdUser(UUID userId);
+    List<Follower> findAllByFollowerIdUser(UUID userId);
+    boolean existsByFollowerIdUserAndFollowedIdUser(UUID followerId, UUID followedId);
+    int countByFollowedIdUser(UUID userId);
+    int countByFollowerIdUser(UUID userId);
+    // Nouvelle méthode pour récupérer les utilisateurs abonnés
+    @Query("SELECT f.follower FROM Follower f WHERE f.followed.idUser = :followedId")
+    List<User> findFollowersByFollowedId(UUID followedId);
 
 }

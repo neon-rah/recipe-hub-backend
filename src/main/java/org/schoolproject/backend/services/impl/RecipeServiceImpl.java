@@ -12,6 +12,8 @@ import org.schoolproject.backend.services.NotificationService;
 import org.schoolproject.backend.services.RecipeService;
 import org.schoolproject.backend.services.UserService;
 import org.schoolproject.backend.specifications.RecipeSpecification;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -33,6 +36,8 @@ public class RecipeServiceImpl implements RecipeService {
     private final UserRepository userRepository;
     private final RecipeMapper recipeMapper;
     private final NotificationService notificationService;
+
+    private static final Logger logger = LoggerFactory.getLogger(RecipeServiceImpl.class);
 
     public RecipeServiceImpl(RecipeRepository recipeRepository, FileStorageService fileStorageService, UserRepository userRepository, RecipeMapper recipeMapper, NotificationService notificationService) {
         this.recipeRepository = recipeRepository;
@@ -58,7 +63,12 @@ public class RecipeServiceImpl implements RecipeService {
 
         Recipe savedRecipe = recipeRepository.save(recipe);
 
+        logger.debug("before entre notif part");
+
         notificationService.sendRecipePublicationNotification(recipe.getUser().getIdUser(),recipe.getIdRecipe(), recipe.getTitle());
+
+        logger.debug("hors notif part");
+
         return recipeMapper.toDto(savedRecipe);
     }
 
@@ -146,7 +156,7 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public List<RecipeDTO> findRecipesByUserId(UUID userId) {
-        return recipeRepository.findAllByUserIdUser(userId).stream()
+        return recipeRepository.findAllByUserIdUserOrderByUpdatedDateDesc(userId).stream()
                 .map(recipeMapper::toDto)
                 .collect(Collectors.toList());
     }
@@ -225,5 +235,15 @@ public class RecipeServiceImpl implements RecipeService {
         Page<Recipe> recipes = recipeRepository.findByUserIdUserNotAndTitleOrIngredientsContainingIgnoreCaseAndCategory(
                 userId, query, category, pageable);
         return recipes.map(recipeMapper::toDto);
+
+
+    }
+
+    @Override
+    public RecipeDTO getRandomRecipeExcludingUser(UUID userId) {
+        List<Recipe> recipes = recipeRepository.findAllByUserIdUserNot(userId);
+        if (recipes.isEmpty()) throw new IllegalStateException("No recipes available");
+        Recipe randomRecipe = recipes.get(new Random().nextInt(recipes.size()));
+        return recipeMapper.toDto(randomRecipe);
     }
 }

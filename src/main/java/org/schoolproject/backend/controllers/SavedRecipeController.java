@@ -1,8 +1,10 @@
 package org.schoolproject.backend.controllers;
 
 import org.schoolproject.backend.config.JwtUtil;
+import org.schoolproject.backend.dto.RecipeDTO;
 import org.schoolproject.backend.entities.SavedRecipe;
 import org.schoolproject.backend.services.SavedRecipeService;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -83,6 +85,22 @@ public class SavedRecipeController {
 
         savedRecipeService.clearAllSavedRecipes(userId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/paged")
+    public ResponseEntity<Page<RecipeDTO>> getSavedRecipesPaged(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size,
+            @RequestParam(required = false) String category,
+            HttpServletRequest request) {
+        String token = jwtUtil.extractToken(request);
+        if (!jwtUtil.validateToken(token)) {
+            throw new SecurityException("Invalid JWT token");
+        }
+        UUID userId = jwtUtil.extractUserId(token);
+
+        Page<RecipeDTO> savedRecipes = savedRecipeService.getSavedRecipesPaged(userId, page, size, category);
+        return ResponseEntity.ok(savedRecipes);
     }
 
 

@@ -77,4 +77,15 @@ public class NotificationController {
         return notificationDTO != null ? new ResponseEntity<>(notificationDTO, HttpStatus.OK) :
                 new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
+
+    @PutMapping("/{userId}/mark-all-seen")
+    public ResponseEntity<Void> markAllAsSeen(@PathVariable UUID userId) {
+        notificationService.markAllAsSeen(userId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+    @GetMapping("/{userId}/unseen")
+    public ResponseEntity<Integer> getUnseenCount(@PathVariable UUID userId) {
+        int unseenCount = notificationService.getUnseenCount(userId);
+        return new ResponseEntity<>(unseenCount, HttpStatus.OK);
+    }
 }

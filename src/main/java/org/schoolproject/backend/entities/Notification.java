@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class Notification {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_notif", updatable = false, nullable = false)
@@ -40,6 +39,9 @@ public class Notification {
 
     @Column(name = "is_read", columnDefinition = "false")
     private boolean read = false;
+
+    @Column(name = "is_seen", columnDefinition = "false")
+    private boolean seen = false;
 
     @Column(name = "related_entity_id")
     private Integer relatedEntityId;  // Par exemple, ID de la recette, null si entity-type user

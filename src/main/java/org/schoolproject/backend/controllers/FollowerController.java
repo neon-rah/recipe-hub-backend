@@ -69,6 +69,11 @@ public class FollowerController {
         return ResponseEntity.ok(followerService.getSuggestedUsers(userId));
     }
 
+    @GetMapping("/{userId}/random-suggestions")
+    public ResponseEntity<List<User>> getRandomSuggestedUsers(@PathVariable UUID userId) {
+        return ResponseEntity.ok(followerService.getRandomSuggestedUsers(userId, 10));
+    }
+
     @GetMapping("/{userId}/search")
     public ResponseEntity<List<User>> searchUsers(
             @PathVariable UUID userId,

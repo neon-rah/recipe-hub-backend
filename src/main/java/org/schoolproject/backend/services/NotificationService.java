@@ -17,4 +17,7 @@ public interface NotificationService {
      void sendFollowNotification(UUID followerId, UUID followedId);
     void markAsRead(int notificationId);
     void sendRecipePublicationNotification(UUID userId, int recipeId, String recipeTitle);
-}
+
+    void markAllAsSeen(UUID userId);
+    int getUnseenCount(UUID userId);
+    }

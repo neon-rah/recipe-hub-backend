@@ -4,7 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -15,12 +16,11 @@ import java.util.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)  // Utilisation de la stratégie AUTO pour UUID
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id_user", nullable = false)
-    private UUID idUser;  // UUID sans la stratégie de génération customisée
+    private UUID idUser;
 
     @Column(name = "last_name", length = 50, nullable = false)
     private String lastName;
@@ -47,14 +47,34 @@ public class User {
 
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private List<Recipe> recipes = new ArrayList<>();
-
 
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private List<Notification> notifications = new ArrayList<>();
 
-    // Utilisateurs qui suivent cet utilisateur
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private List<Like> likes = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private List<SavedRecipe> savedRecipes = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private List<Follower> followersList = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "followed", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private List<Follower> followingList = new ArrayList<>();
+
     @JsonIgnore
     @ManyToMany
     @JoinTable(
@@ -64,10 +84,7 @@ public class User {
     )
     private List<User> followers = new ArrayList<>();
 
-    // Utilisateurs suivis par cet utilisateur
     @JsonIgnore
     @ManyToMany(mappedBy = "followers")
     private List<User> following = new ArrayList<>();
-
-
 }

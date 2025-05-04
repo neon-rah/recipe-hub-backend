@@ -49,13 +49,14 @@ final UserDetailsService userDetailsService;
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .cors(withDefaults())
-                .csrf(csrf -> csrf.disable()) // Désactivation du CSRF pour API REST
+                .csrf(csrf -> csrf.disable()) // Désactivation du CSRF pour API REST et websocket
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // API sans session
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll() // Autorise l'authentification
+                        .requestMatchers("/ws/**").permitAll() // autorise l'endpoint websocket
                         .anyRequest().authenticated() // Toutes les autres routes nécessitent un JWT valide
                 )
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class); // Filtrage des requêtes
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class); // Filtrage des requêtes avec JWT
 
         return http.build();
     }

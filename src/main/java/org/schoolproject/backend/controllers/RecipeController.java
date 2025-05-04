@@ -187,4 +187,15 @@ public class RecipeController {
     public ResponseEntity<List<RecipeDTO>> findRecipesWithUserInfo(@PathVariable UUID userId) {
         return ResponseEntity.ok(recipeService.findRecipesWithUserInfo(userId));
     }
+
+    @GetMapping("/random")
+    public ResponseEntity<RecipeDTO> getRandomRecipeExcludingUser(HttpServletRequest request) {
+        String token = jwtUtil.extractToken(request);
+        if (!jwtUtil.validateToken(token)) {
+            throw new SecurityException("Invalid JWT token");
+        }
+        UUID userId = jwtUtil.extractUserId(token);
+        RecipeDTO randomRecipe = recipeService.getRandomRecipeExcludingUser(userId);
+        return ResponseEntity.ok(randomRecipe);
+    }
 }

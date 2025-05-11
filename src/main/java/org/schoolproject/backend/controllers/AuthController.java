@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.schoolproject.backend.dto.UserDTO;
 import org.schoolproject.backend.services.AuthService;
+import org.schoolproject.backend.services.VerificationCodeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -14,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
-import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,18 +25,42 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthService authService;
+    private final VerificationCodeService verificationCodeService;
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
-    /**
-     * Classe pour structurer les réponses d'erreur
-     */
-    record ErrorResponse(int status, String error, String message) {}
 
     /**
-     * Inscription d'un utilisateur
+     * Lance l'inscription en envoyant un code de vérification
      */
+    @PostMapping(value = "/register")
+    public ResponseEntity<Map<String, String>> initiateRegistration(
+            @RequestBody Map<String, String> request) {
+        logger.info("Received registration initiation request");
 
-    @PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+        try {
+            // Extraire l'email
+            String email = request.get("email");
+
+            // Validation minimale
+            if (email == null) {
+                throw new IllegalArgumentException("Email is required");
+            }
+
+            logger.info("Initiating registration for email: {}", email);
+
+            // Lancer le processus d'inscription
+            authService.initiateRegistration(email);
+            return ResponseEntity.ok(Map.of("message", "Code de vérification envoyé à votre email."));
+        } catch (Exception e) {
+            logger.error("Registration initiation failed", e);
+            throw e;
+        }
+    }
+
+    /**
+     * Finalise l'inscription après vérification du code
+     */
+    @PostMapping(value = "/complete-registration", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Map<String, Object>> register(
             MultipartHttpServletRequest request,
             HttpServletResponse response) {
@@ -49,11 +73,11 @@ public class AuthController {
             String address = request.getParameter("address");
             String email = request.getParameter("email");
             String password = request.getParameter("password");
-            // confirmPassword est ignoré ici car validé côté frontend
+            String code = request.getParameter("code");
 
             // Validation minimale
-            if (lastName == null || firstName == null || address == null || email == null || password == null) {
-                throw new IllegalArgumentException("Missing required fields: lastName, firstName, address, email, or password");
+            if (lastName == null || firstName == null || address == null || email == null || password == null || code == null) {
+                throw new IllegalArgumentException("Missing required fields: lastName, firstName, address, email, password or code");
             }
 
             // Créer UserDTO
@@ -68,16 +92,38 @@ public class AuthController {
             MultipartFile profilePic = request.getFile("profilePic");
 
             logger.info("Received registration request for email: {}", email);
-            logger.debug("UserDTO: lastName={}, firstName={}, address={}, email={}, profilePic provided: {}",
-                    lastName, firstName, address, email, profilePic != null);
+            logger.debug("UserDTO: lastName={}, firstName={}, address={}, email={}, code={}, profilePic provided: {}",
+                    lastName, firstName, address, email,code, profilePic != null);
 
-            // Appeler le service d'authentification
-            Map<String, Object> authResponse = authService.register(userDTO, profilePic, response);
+            // finalisation
+            Map<String, Object> authResponse = authService.completeRegistration(userDTO,code,profilePic, response);
             logger.info("Registration successful for email: {}", email);
             return ResponseEntity.ok(authResponse);
         } catch (Exception e) {
             logger.error("Registration failed", e);
             throw e; // Propager l'exception pour gestion par @ExceptionHandler
+        }
+    }
+
+    /**
+     * Renvoyer un code de vérification
+     */
+    @PostMapping("/resend-code")
+    public ResponseEntity<Map<String, String>> resendCode(@RequestBody Map<String, String> request) {
+        logger.info("Received resend code request");
+
+        try {
+            String email = request.get("email");
+
+            if(email == null || email.trim().isEmpty()) {
+                throw new IllegalArgumentException("Email is required");
+            }
+            logger.info("Resend code request for email: {}", email);
+            verificationCodeService.resendCode(email);
+            return ResponseEntity.ok(Map.of("message", "Nouveau code de vérification envoyé."));
+        } catch (Exception e) {
+            logger.error("Resend code failed", e);
+            throw e;
         }
     }
 

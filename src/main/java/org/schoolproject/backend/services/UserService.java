@@ -20,7 +20,7 @@ public interface UserService {
     boolean verifyPassword(UUID id, String password);
     void changePassword(UUID id, String newPassword);
 
-    // ✅ Ajout de la méthode pour récupérer le profil utilisateur avec ses recettes
+    //  Ajout de la méthode pour récupérer le profil utilisateur avec ses recettes
     Optional<UserDTO> getUserProfile(UUID userId);
     UserDTO getUserProfileFromToken(String token);
 

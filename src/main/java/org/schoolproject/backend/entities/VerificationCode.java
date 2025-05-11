@@ -1,12 +1,11 @@
 package org.schoolproject.backend.entities;
 
-
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "verification_codes")
@@ -19,17 +18,21 @@ public class VerificationCode {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_verif", nullable = false, updatable = false)
-    private int idVerif;
+    private Integer idVerif;
 
+    @NotNull
+    @Column(nullable = false)
     private String email;
 
+    @NonNull
+    @Column(nullable = false)
     private String code;
 
     @CreationTimestamp
-    @Column(name = "expiry_date")
-    private LocalDate expiryDate;
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
-    @UpdateTimestamp
-    @Column(name = "updated_date")
-    private LocalDate updateDate;
+    @NonNull
+    @Column(name = "expiry_date", nullable = false)
+    private LocalDateTime expiryDate;
 }

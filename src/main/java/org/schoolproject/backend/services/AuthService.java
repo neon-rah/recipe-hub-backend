@@ -9,6 +9,7 @@ import org.schoolproject.backend.entities.User;
 import org.schoolproject.backend.mappers.UserMapper;
 import org.schoolproject.backend.repositories.UserRepository;
 import org.schoolproject.backend.config.JwtUtil;
+import org.schoolproject.backend.repositories.VerificationCodeRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -17,6 +18,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -34,14 +36,31 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
     private final FileStorageService fileStorageService;
+    private final VerificationCodeService verificationCodeService;
+    private final VerificationCodeRepository verificationCodeRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+
+    /**
+     * envoye de code de verification d'email, confirmation avant inscription
+     */
+    public void initiateRegistration(String email){
+
+        if(userRepository.existsByEmail(email)){
+            throw new IllegalArgumentException("Email already in use.");
+        }
+        verificationCodeService.generateAndSendCode(email);
+    }
 
 
     /**
      * Inscription d'un utilisateur
      */
-    public Map<String, Object> register(UserDTO userDTO, MultipartFile profileImage, HttpServletResponse response) {
+    @Transactional
+    public Map<String, Object> completeRegistration(UserDTO userDTO,String code, MultipartFile profileImage, HttpServletResponse response) {
+        // Vérifier le code
+        verificationCodeService.verifyCode(userDTO.getEmail(), code);
+
         // Vérifier si l'email existe déjà
         if (userRepository.existsByEmail(userDTO.getEmail())) {
             throw new IllegalArgumentException("Email address already in use");
@@ -62,8 +81,12 @@ public class AuthService {
             // Sauvegarder l'utilisateur dans la base de données
             userRepository.save(user);
 
+            // Supprimer le code de vérification
+            verificationCodeRepository.deleteByEmail(userDTO.getEmail());
+
             // Générer et retourner la réponse d'authentification
             return generateAuthResponse(user, response);
+
 
         } catch (Exception e) {
             // Gérer les erreurs spécifiques ou générales

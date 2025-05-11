@@ -27,12 +27,12 @@ public class JwtUtil {
     @Value("${jwt.access-token.expiration}")
     private long accessTokenExpiration;
 
-    // 🔹 Génération de la clé secrète
+    //  Génération de la clé secrète
     private Key getSigningKey() {
         return Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
-    // 🔹 Génération de l'Access Token avec Email et UUID
+    //  Génération de l'Access Token avec Email et UUID
     public String generateAccessToken(UUID userId, String email) {
         return Jwts.builder()
                 .setSubject(email)  // Utilisation de l'email comme subject
@@ -43,7 +43,7 @@ public class JwtUtil {
                 .compact();
     }
 
-    // 🔹 Génération du Refresh Token
+    //  Génération du Refresh Token
     public String generateRefreshToken(UUID userId, String email) {
         return Jwts.builder()
                 .setSubject(email)
@@ -54,18 +54,18 @@ public class JwtUtil {
                 .compact();
     }
 
-    // 🔹 Extraire l'email depuis un token
+    // Extraire l'email depuis un token
     public String extractEmail(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
-    // 🔹 Extraire l'UUID depuis un token
+    //  Extraire l'UUID depuis un token
     public UUID extractUserId(String token) {
         String userId = extractClaim(token, claims -> claims.get("userId", String.class));
         return userId != null ? UUID.fromString(userId) : null;
     }
 
-    // 🔹 Vérifier si le token est valide
+    //  Vérifier si le token est valide
     public boolean validateToken(String token) {
         try {
             Jwts.parser()
@@ -78,7 +78,7 @@ public class JwtUtil {
         }
     }
 
-    // 🔹 Extraire un claim générique
+    //  Extraire un claim générique
     private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         Claims claims = Jwts.parser()
                 .setSigningKey(getSigningKey())

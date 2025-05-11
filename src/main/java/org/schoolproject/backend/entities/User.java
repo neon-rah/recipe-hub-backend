@@ -45,6 +45,12 @@ public class User {
     @Column(updatable = false)
     private LocalDateTime created;
 
+    @Column(name = "reset_token")
+    private String resetToken;
+
+    @Column(name = "reset_token_expired_at")
+    private LocalDateTime resetTokenExpiredAt;
+
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @OnDelete(action = OnDeleteAction.CASCADE)

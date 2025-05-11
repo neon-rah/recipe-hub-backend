@@ -249,108 +249,35 @@ public class AuthController {
     }
 
     /**
-     * Vérifier la validité du refreshToken envoyé dans le corps de la requête
+     * Initie le processus de réinitialisation du mot de passe
      */
-   /* @PostMapping("/verify-refresh-token")
-    public ResponseEntity<Map<String, Boolean>> verifyRefreshToken(@RequestBody Map<String, String> requestBody) {
-        logger.info("Requête reçue pour vérifier la validité du refreshToken");
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Map<String, Object>> initiateResetPassword(@RequestBody Map<String, String> requestBody) {
+        String email = requestBody.get("email");
 
-        try {
-            String refreshToken = requestBody.get("refreshToken");
-            if (refreshToken == null || refreshToken.trim().isEmpty()) {
-                logger.warn("Aucun refreshToken trouvé dans le corps de la requête");
-                return ResponseEntity.badRequest().body(Map.of("valid", false));
-            }
-            logger.debug("refreshToken extrait du corps: {}", refreshToken);
-
-            boolean isValid = authService.isRefreshTokenValid(refreshToken);
-            logger.debug("Résultat de la validation du refreshToken: {}", isValid);
-
-            Map<String, Boolean> responseBody = Map.of("valid", isValid);
-            logger.debug("Réponse préparée: {}", responseBody);
-            return ResponseEntity.ok(responseBody);
-        } catch (Exception e) {
-            logger.error("Erreur lors de la vérification du refreshToken", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("valid", false));
+        if (email == null || email.trim().isEmpty()) {
+            throw new IllegalArgumentException("Email required");
         }
-    }*/
+
+        Map<String, Object> responseBody = authService.initiatePasswordReset(email);
+
+        return ResponseEntity.ok(responseBody);
+    }
 
     /**
-     * Rafraîchir le token avec le refreshToken envoyé dans le corps de la requête
+     * Réinitialise le mot de passe avec un token valide
      */
-    /*@PostMapping("/refresh-token")
-    public ResponseEntity<Map<String, String>> refreshToken(@RequestBody Map<String, String> requestBody) {
-        logger.info("Requête reçue pour rafraîchir le token");
+    @PostMapping("/reset-password")
+    public ResponseEntity<Map<String, Object>> resetPassword(@RequestBody Map<String, String> requestBody) {
 
-        try {
-            String refreshToken = requestBody.get("refreshToken");
-            if (refreshToken == null || refreshToken.trim().isEmpty()) {
-                logger.warn("Aucun refreshToken trouvé dans le corps de la requête");
-                return ResponseEntity.badRequest().body(Map.of("error", "No refresh token provided"));
-            }
-            logger.debug("refreshToken extrait du corps: {}", refreshToken);
+        String token = requestBody.get("token");
+        String newPassword = requestBody.get("newPassword");
 
-            String newAccessToken = authService.refreshAccessToken(refreshToken);
-            logger.debug("Nouveau accessToken généré: {}", newAccessToken);
-
-            Map<String, String> responseBody = new HashMap<>();
-            responseBody.put("accessToken", newAccessToken);
-            logger.debug("Réponse préparée: {}", responseBody);
-            return ResponseEntity.ok(responseBody);
-        } catch (Exception e) {
-            logger.error("Erreur lors du rafraîchissement du token", e);
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Token refresh failed"));
+        if (token == null || token.trim().isEmpty() || newPassword == null || newPassword.trim().isEmpty()) {
+            throw new IllegalArgumentException("Token and new password required");
         }
-    }*/
-    /*
-     * Déconnexion de l'utilisateur
-     */
-    @PostMapping("/logout")
-    public ResponseEntity<Map<String, String>> logout(HttpServletResponse response) {
-        logger.info("Received logout request");
-
-        try {
-            Map<String, String> logoutResponse = authService.logout(response);
-            logger.info("Logout successful");
-            return ResponseEntity.ok(logoutResponse);
-        } catch (Exception e) {
-            logger.error("Logout failed", e);
-            throw e;
-        }
+        Map<String, Object> responseBody = authService.resetPassword(token, newPassword);
+        return ResponseEntity.ok(responseBody);
     }
 
-  /*  // Gestion des exceptions spécifiques
-    @ExceptionHandler(MissingServletRequestPartException.class)
-    public ResponseEntity<ErrorResponse> handleMissingPartException(MissingServletRequestPartException ex) {
-        ErrorResponse error = new ErrorResponse(
-                HttpStatus.BAD_REQUEST.value(),
-                "Missing required part: " + ex.getRequestPartName(),
-                ex.getMessage()
-        );
-        logger.warn("Missing request part: {}", ex.getRequestPartName());
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
-        ErrorResponse error = new ErrorResponse(
-                HttpStatus.BAD_REQUEST.value(),
-                "Invalid request data",
-                ex.getMessage()
-        );
-        logger.warn("Invalid request data: {}", ex.getMessage());
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
-        ErrorResponse error = new ErrorResponse(
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "An unexpected error occurred",
-                ex.getMessage()
-        );
-        logger.error("Unexpected error occurred", ex);
-        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
-    }*/
 }

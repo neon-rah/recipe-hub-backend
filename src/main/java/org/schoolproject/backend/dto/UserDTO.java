@@ -23,6 +23,9 @@ public class UserDTO {
     private String profilePic;
     private LocalDateTime created;
 
+    private String resetToken;
+    private LocalDateTime resetTokenExpiredAt;
+
     @JsonIgnore
     @JsonManagedReference  // Empêche la boucle infinie
     private List<RecipeDTO> recipes;  // Champ facultatif

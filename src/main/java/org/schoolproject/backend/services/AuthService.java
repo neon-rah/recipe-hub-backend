@@ -12,6 +12,7 @@ import org.schoolproject.backend.config.JwtUtil;
 import org.schoolproject.backend.repositories.VerificationCodeRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,8 +23,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -38,6 +41,13 @@ public class AuthService {
     private final FileStorageService fileStorageService;
     private final VerificationCodeService verificationCodeService;
     private final VerificationCodeRepository verificationCodeRepository;
+    private final EmailService emailService;
+
+    @Value("${frontend.reset.link}")
+    private String frontendResetLink;
+    
+    @Value("${reset.token.expiration.minutes}")
+    private int expirationMinutes;
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
@@ -176,27 +186,7 @@ public class AuthService {
         return responseBody;
     }
 
-
-
-    /**
-     * Générer la réponse contenant UserDTO, Access Token et Refresh Token
-     */
-   /* private Map<String, Object> generateAuthResponse(User user, HttpServletResponse response) {
-        logger.info("Génération de la réponse d'authentification pour: {}", user.getEmail());
-
-        String accessToken = jwtUtil.generateAccessToken(user.getIdUser(), user.getEmail());
-        String refreshToken = jwtUtil.generateRefreshToken(user.getIdUser(), user.getEmail());
-        logger.debug("Tokens générés - accessToken: {}, refreshToken: {}", accessToken, refreshToken);
-
-        // Préparer la réponse avec refreshToken dans le corps
-        Map<String, Object> responseBody = new HashMap<>();
-        responseBody.put("accessToken", accessToken);
-        responseBody.put("refreshToken", refreshToken); // Ajouté au corps
-        responseBody.put("user", userMapper.toDto(user));
-        logger.debug("Réponse préparée: {}", responseBody);
-
-        return responseBody;
-    }*/
+  
     public Map<String, String> logout(HttpServletResponse response) {
         // Supprimer le cookie du Refresh Token
         Cookie refreshTokenCookie = new Cookie("refreshToken", "");
@@ -208,4 +198,84 @@ public class AuthService {
 
         return Map.of("message", "Déconnexion réussie");
     }
+
+    /**
+     * Envoyer email pour la reinitialisation de mot de passe
+     */
+    @Transactional
+    public Map<String, Object> initiatePasswordReset(String email) {
+        Map<String, Object> response = new HashMap<>();
+        Optional<User> userOptional = userRepository.findByEmail(email);
+
+        if (userOptional.isEmpty()){
+            throw new IllegalArgumentException("User not found with email: " + email);
+        }
+        User user = userOptional.get();
+
+        //generer un nouveau token
+        String resetToken = UUID.randomUUID().toString();
+        LocalDateTime expiryDate = LocalDateTime.now().plusMinutes(expirationMinutes);
+
+        //mise a jour de l'utilisateur dans la base de donnee
+        user.setResetToken(resetToken);
+        user.setResetTokenExpiredAt(expiryDate);
+        userRepository.save(user);
+
+        //lien de reinitialisation
+        String resetLink = frontendResetLink+resetToken;
+
+        // envoie de l'email
+        try {
+            String subject = "Reset password";
+            String body = "Follow the link bellow to reset your password :\n"+resetLink+
+                    "\n This link expires in "+expirationMinutes+ "minutes.";
+            emailService.sendEmail(user.getEmail(), subject, body);
+
+            response.put("success", true);
+            response.put("message", "An Email has been sent. The reset link expires in "+expirationMinutes+"minutes.");
+        } catch (Exception e) {
+            logger.error("Erreur lors de l'envoi de l'email de réinitialisation", e);
+            throw new RuntimeException("An error occurred when sending email, please try again.", e);
+        }
+
+        return response;
+
+    }
+
+    /**
+     * Vérifie la validité du token de réinitialisation
+     */
+    @Transactional
+    public Map<String, Object> resetPassword(String token, String newPassword) {
+        Map<String, Object> response = new HashMap<>();
+        Optional<User> userOptional = userRepository.findByResetToken(token);
+        if (userOptional.isEmpty()){
+            throw new IllegalArgumentException("Token invalid.");
+        }
+        User user = userOptional.get();
+
+        //verification de l'expiration
+
+        if(user.getResetTokenExpiredAt().isBefore(LocalDateTime.now())){
+            user.setResetToken(null);
+            user.setResetTokenExpiredAt(null);
+            userRepository.save(user);
+            throw new IllegalArgumentException("Expired reset password link");
+        }
+
+        //mette a jour sinon
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setResetToken(null);
+        user.setResetTokenExpiredAt(null);
+        userRepository.save(user);
+
+        response.put("success", true);
+        response.put("message", "Reset password successful");
+
+        return response;
+
+    }
+
+
+
 }

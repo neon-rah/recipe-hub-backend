@@ -22,6 +22,8 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     List<User> findAllById(Iterable<UUID> ids);
 
+    Optional<User> findByResetToken(String resetToken);
+
 
     // Requête corrigée pour récupérer les IDs des abonnés
     @Query("SELECT f.idUser FROM User u JOIN u.followers f WHERE u.idUser = :followedId")

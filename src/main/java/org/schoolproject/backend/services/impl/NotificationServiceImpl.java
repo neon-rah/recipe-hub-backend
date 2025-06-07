@@ -222,4 +222,71 @@ public class NotificationServiceImpl implements NotificationService {
         followers.forEach(follower -> logger.debug("Abonné : {} - {}", follower.getIdUser(), follower.getEmail()));
         return followers;
     }
+
+
+    @Transactional
+    @Override
+    public void sendCommentNotification(UUID commenterId, UUID recipeOwnerId, int recipeId, String commentContent) {
+        Optional<User> commenterOpt = userRepository.findById(commenterId);
+        Optional<User> recipeOwnerOpt = userRepository.findById(recipeOwnerId);
+
+        if (commenterOpt.isEmpty() || recipeOwnerOpt.isEmpty()) {
+            throw new IllegalArgumentException("User not found");
+        }
+
+        User commenter = commenterOpt.get();
+        User recipeOwner = recipeOwnerOpt.get();
+
+        String title = "New comment on your recipe";
+        String message = (commenter.getFirstName() != null ? commenter.getFirstName() + " " + commenter.getLastName() : commenter.getLastName()) +
+                " commented: " + commentContent;
+
+        Notification notification = Notification.builder()
+                .user(recipeOwner)
+                .sender(commenter)
+                .title(title)
+                .message(message)
+                .createdAt(LocalDateTime.now())
+                .read(false)
+                .seen(false)
+                .relatedEntityId(recipeId)
+                .entityType("comment")
+                .build();
+
+        Notification savedNotification = notificationRepository.save(notification);
+        messagingTemplate.convertAndSend("/topic/notifications/" + recipeOwnerId, notificationMapper.toDTO(savedNotification));
+    }
+
+    @Transactional
+    @Override
+    public void sendReplyNotification(UUID replierId, UUID parentCommentOwnerId, int recipeId, String replyContent) {
+        Optional<User> replierOpt = userRepository.findById(replierId);
+        Optional<User> parentCommentOwnerOpt = userRepository.findById(parentCommentOwnerId);
+
+        if (replierOpt.isEmpty() || parentCommentOwnerOpt.isEmpty()) {
+            throw new IllegalArgumentException("User not found");
+        }
+
+        User replier = replierOpt.get();
+        User parentCommentOwner = parentCommentOwnerOpt.get();
+
+        String title = "New reply to your comment";
+        String message = (replier.getFirstName() != null ? replier.getFirstName() + " " + replier.getLastName() : replier.getLastName()) +
+                " replied: " + replyContent;
+
+        Notification notification = Notification.builder()
+                .user(parentCommentOwner)
+                .sender(replier)
+                .title(title)
+                .message(message)
+                .createdAt(LocalDateTime.now())
+                .read(false)
+                .seen(false)
+                .relatedEntityId(recipeId)
+                .entityType("comment")
+                .build();
+
+        Notification savedNotification = notificationRepository.save(notification);
+        messagingTemplate.convertAndSend("/topic/notifications/" + parentCommentOwnerId, notificationMapper.toDTO(savedNotification));
+    }
 }

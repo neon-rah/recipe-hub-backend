@@ -1,5 +1,6 @@
 package org.schoolproject.backend.services;
 
+import jakarta.transaction.Transactional;
 import org.schoolproject.backend.dto.NotificationDTO;
 
 import java.util.List;
@@ -20,4 +21,10 @@ public interface NotificationService {
 
     void markAllAsSeen(UUID userId);
     int getUnseenCount(UUID userId);
-    }
+
+    @Transactional
+    void sendCommentNotification(UUID commenterId, UUID recipeOwnerId, int recipeId, String commentContent);
+
+    @Transactional
+    void sendReplyNotification(UUID replierId, UUID parentCommentOwnerId, int recipeId, String replyContent);
+}

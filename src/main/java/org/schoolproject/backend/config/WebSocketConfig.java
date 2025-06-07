@@ -21,5 +21,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.enableSimpleBroker("/topic","/queue");  // Utilisé pour envoyer des messages aux clients
         registry.setApplicationDestinationPrefixes("/app"); // Préfixe des messages envoyés au backend
+        registry.setUserDestinationPrefix("/user");
     }
 }

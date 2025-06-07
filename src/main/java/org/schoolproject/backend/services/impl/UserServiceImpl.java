@@ -49,16 +49,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO getUserProfileFromToken(String token) {
-        if (jwtUtil.validateToken(token)) {
-            String userEmail = jwtUtil.extractEmail(token);
-            Optional<User> user = userRepository.findByEmail(userEmail);
-            if (user.isPresent()) {
-                return  userMapper.toDto(user.get());
-            } else {
-                throw new RuntimeException("User not found");
-            }
+        if (!jwtUtil.validateToken(token)) {
+            throw new SecurityException("Invalid token");
+        }
+
+        String userEmail = jwtUtil.extractEmail(token);
+        Optional<User> user = userRepository.findByEmail(userEmail);
+        if (user.isPresent()) {
+            return userMapper.toDto(user.get());
         } else {
-            throw new RuntimeException("Invalid token");
+            throw new IllegalArgumentException("User not found");
         }
     }
 
@@ -84,20 +84,47 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserDTO updateUser(UUID userId, UserDTO updatedUserDTO, MultipartFile newProfileImage) {
-        return userRepository.findById(userId).map(existingUser -> {
-            existingUser.setFirstName(updatedUserDTO.getFirstName());
-            existingUser.setLastName(updatedUserDTO.getLastName());
-            existingUser.setEmail(updatedUserDTO.getEmail());
-            existingUser.setAddress(updatedUserDTO.getAddress());
+    public UserDTO updateUser(UUID userId, UserDTO updatedUserDTO, MultipartFile newProfileImage, String token) {
+        // Vérifier le token pour s'assurer que l'utilisateur modifie ses propres données
+        if (!jwtUtil.validateToken(token)) {
+            throw new SecurityException("Invalid token");
+        }
 
-            if (newProfileImage != null && !newProfileImage.isEmpty()) {
+        String emailFromToken = jwtUtil.extractEmail(token);
+        Optional<User> userFromToken = userRepository.findByEmail(emailFromToken);
+        if (userFromToken.isEmpty() || !userFromToken.get().getIdUser().equals(userId)) {
+            throw new SecurityException("You can only update your own profile");
+        }
+
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (optionalUser.isEmpty()) {
+            throw new IllegalArgumentException("User not found");
+        }
+
+        User existingUser = optionalUser.get();
+
+        // Vérifier si l'email est modifié et s'il est déjà utilisé par un autre utilisateur
+        if (!existingUser.getEmail().equals(updatedUserDTO.getEmail()) && userRepository.existsByEmail(updatedUserDTO.getEmail())) {
+            throw new IllegalArgumentException("Email address already in use by another user");
+        }
+
+        // Mettre à jour les champs
+        existingUser.setFirstName(updatedUserDTO.getFirstName());
+        existingUser.setLastName(updatedUserDTO.getLastName());
+        existingUser.setEmail(updatedUserDTO.getEmail());
+        existingUser.setAddress(updatedUserDTO.getAddress());
+
+        // Gérer l'image de profil
+        if (newProfileImage != null && !newProfileImage.isEmpty()) {
+            try {
                 String newImageUrl = fileStorageService.storeFile(newProfileImage, "user", existingUser.getProfilePic());
                 existingUser.setProfilePic(newImageUrl);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to update profile image: " + e.getMessage());
             }
+        }
 
-            return userMapper.toDto(userRepository.save(existingUser));
-        }).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        return userMapper.toDto(userRepository.save(existingUser));
     }
 
     @Override
@@ -122,11 +149,33 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void changePassword(UUID id, String newPassword) {
-        userRepository.findById(id).ifPresent(existingUser -> {
-            existingUser.setPassword(passwordEncoder.encode(newPassword));
-            userRepository.save(existingUser);
-        });
+    public void changePassword(UUID id, String currentPassword, String newPassword, String token) {
+        // Vérifier le token
+        if (!jwtUtil.validateToken(token)) {
+            throw new SecurityException("Invalid token");
+        }
+
+        String emailFromToken = jwtUtil.extractEmail(token);
+        Optional<User> userFromToken = userRepository.findByEmail(emailFromToken);
+        if (userFromToken.isEmpty() || !userFromToken.get().getIdUser().equals(id)) {
+            throw new SecurityException("You can only change your own password");
+        }
+
+        Optional<User> optionalUser = userRepository.findById(id);
+        if (optionalUser.isEmpty()) {
+            throw new IllegalArgumentException("User not found");
+        }
+
+        User existingUser = optionalUser.get();
+
+        // Vérifier le mot de passe actuel
+        if (!passwordEncoder.matches(currentPassword, existingUser.getPassword())) {
+            throw new IllegalArgumentException("Current password is incorrect");
+        }
+
+        // Mettre à jour le mot de passe
+        existingUser.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(existingUser);
     }
 
     @Override

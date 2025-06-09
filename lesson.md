@@ -337,3 +337,7 @@ Voici un récapitulatif complet des annotations de paramètres dans Spring, leur
 - **Types de données** : Aligne les types Java (`UUID`, `int`, `String`) avec les données envoyées par le frontend pour éviter les erreurs de conversion.
 
 Si tu as besoin d'autres exemples spécifiques ou d'une clarification sur un cas particulier (par exemple, un endpoint complexe), fais-le-moi savoir !
+
+table et crud , architecture spring boot 
+
+

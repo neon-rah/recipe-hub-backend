@@ -118,7 +118,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public List<CommentDTO> getCommentsByRecipeId(int recipeId) {
-        List<Comment> comments = commentRepository.findAllByRecipeIdRecipe(recipeId);
+        List<Comment> comments = commentRepository.findAllByRecipeIdRecipeOrderByCreatedAtDesc(recipeId);
         return comments.stream()
                 .map(commentMapper::toDto)
                 .collect(Collectors.toList());

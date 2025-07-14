@@ -16,6 +16,6 @@ public class CommentDTO {
     private int parentId;
     private String content;
     private LocalDateTime createdAt;
-    private List<CommentDTO> replies;
+//    private List<CommentDTO> replies;
     private boolean deleted = false;
 }

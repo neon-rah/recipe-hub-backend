@@ -22,6 +22,7 @@ public class CommentController {
         this.jwtUtil = jwtUtil;
     }
 
+
     @PostMapping
     public ResponseEntity<CommentDTO> createComment(
             @RequestBody CommentDTO commentDTO,

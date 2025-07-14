@@ -27,7 +27,7 @@ public interface CommentMapper {
             ")")
     @Mapping(target = "userProfilePic", source = "user.profilePic")
     @Mapping(target = "parentId", source = "parent.idComment")
-    @Mapping(target = "replies", source = "replies")
+//    @Mapping(target = "replies", source = "replies")
     CommentDTO toDto(Comment comment);
 
     List<CommentDTO> toDtoList(List<Comment> comments);
@@ -38,6 +38,6 @@ public interface CommentMapper {
     @Mapping(target = "recipe", ignore = true)
     @Mapping(target = "parent", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "replies", ignore = true)
+//    @Mapping(target = "replies", ignore = true)
     Comment toEntity(CommentDTO commentDTO);
 }
